@@ -1,5 +1,4 @@
-#include <windows.h>
-#include <string>
+#include "stdafx.h"
 #include "Widget.h"
 #include "Fractal.h"
 #include "Help.h"
@@ -101,7 +100,7 @@ LRESULT CALLBACK WidgetWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_LBUTTONDOWN :
-		yPos = HIWORD(lParam);
+		yPos = GET_Y_LPARAM(lParam);
 		widget.jumpFocus();
 		break;
 
@@ -229,7 +228,7 @@ void Widget::addBoolean(char* nlegend, void* ptr) {
 
 void Widget::moveFocus(int direction) {
 	if (count < 2) return;
-	focus += direction;
+	focus += direction > 0 ? 1 : -1;
 	if (focus < 0) focus = count - 1; else if (focus >= count) focus = 0;
 
 	if (data[focus].kind == klegend || data[focus].kind == kboolean) moveFocus(direction);
@@ -273,8 +272,6 @@ void Widget::jumpToPreviousFocus() {
 		break;
 	}
 }
-
-int alterationDirection = 0;
 
 bool Widget::isAltering() {
 	if (alterationDirection == 0) return false;

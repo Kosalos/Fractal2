@@ -1,5 +1,4 @@
-#include <windows.h>
-#include <d3d11.h>                                 
+#include "stdafx.h"
 #include "View.h"
 #include "Fractal.h"
 #include "Widget.h"
@@ -46,6 +45,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		fractal.keyUp(wParam);
 		break;
 
+	case WM_LBUTTONDOWN:
+		fractal.lButtonDown(lParam);
+		break;
+	case WM_LBUTTONUP:
+		fractal.lButtonUp();
+		break;
+	case WM_RBUTTONDOWN:
+		fractal.rButtonDown(lParam);
+		break;
+	case WM_RBUTTONUP:
+		fractal.rButtonUp();
+		break;
+	case WM_MOUSEMOVE:
+		fractal.mouseMove(wParam, lParam);
+		break;
+	case WM_MOUSEHWHEEL :
+	case WM_MOUSEWHEEL :
+	{
+		int direction = GET_WHEEL_DELTA_WPARAM(wParam);
+		widget.moveFocus(-direction/120);
+	}
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

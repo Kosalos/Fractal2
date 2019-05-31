@@ -34,13 +34,15 @@ public:
 	int count;
 	int focus;
 	bool isVisible;
-
+	int alterationDirection;
+	
 	Widget() {
 		hWnd = NULL;
 		hdc = NULL;
 		count = 0;
 		focus = 0;
 		isVisible = false;
+		alterationDirection = 0;
 	}
 
 	void create(HWND parent, HINSTANCE inst);

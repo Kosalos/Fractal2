@@ -1,5 +1,4 @@
-#include <windows.h>
-#include <string>
+#include "stdafx.h"
 #include "common.h"
 #include "Help.h"
 

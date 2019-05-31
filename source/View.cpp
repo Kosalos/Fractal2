@@ -1,7 +1,4 @@
-#include <io.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <string>
+#include "stdafx.h"
 #include "View.h"
 #include "cShader.h"
 #include "vShader.h"

@@ -1,5 +1,4 @@
-#include <windows.h>
-#include <d3d11.h>
+#include "stdafx.h"
 #include "Fractal.h"
 #include "View.h"
 #include "Widget.h"
@@ -838,23 +837,32 @@ void Fractal::update() {
 	}
 }
 
-bool rotateMode = false;
+bool alternateJogMode = false; // 'A' key pressed while mouse jogging? = XZ movement rather than XY
+bool rotateMode = false; // 'Z' key pressed while jogging? = rotate camera rather than move it.
+
+void Fractal::moveCamera(XMFLOAT4 amt) {
+	if (rotateMode) {
+		updateShaderDirectionVector(add4(control.viewVector, amt));
+	}
+	else {
+		control.camera = sub4(control.camera, mult4(control.sideVector, amt.x));
+		control.camera = sub4(control.camera, mult4(control.topVector, amt.y));
+		control.camera = add4(control.camera, mult4(control.viewVector, amt.z));
+	}
+}
 
 void Fractal::timer() {
-	if (widget.isAltering())
+	// mouse dragging to move/rotate camera
+	mouseTimerHandler(); 
+
+	// left/right arrow keys altering a parameter
+	if (widget.isAltering()) 
 		isDirty = true;
 
-	if (jogAmount.x != 0 || jogAmount.y != 0 || jogAmount.z != 0) {
+	// number keys pressed to move/rotate camera
+	if (jogAmount.x != 0 || jogAmount.y != 0 || jogAmount.z != 0) { 
 		isDirty = true;
-
-		if (rotateMode) {
-			updateShaderDirectionVector(add4(control.viewVector, jogAmount));
-		}
-		else {
-			control.camera = sub4(control.camera, mult4(control.sideVector, jogAmount.x));
-			control.camera = sub4(control.camera, mult4(control.topVector, jogAmount.y));
-			control.camera = add4(control.camera, mult4(control.viewVector, jogAmount.z));
-		}
+		moveCamera(jogAmount);
 	}
 }
 
@@ -969,6 +977,9 @@ void Fractal::keyDown(int key) {
 		control.juliaboxMode = !control.juliaboxMode;
 		refresh(false);
 		break;
+	case 'a' :
+		alternateJogMode = true;	// XZ mouse movements rather than XY
+		break;
 	case 'z':
 		rotateMode = true;
 		break;
@@ -1025,9 +1036,76 @@ void Fractal::keyUp(int key) {
 	case '7':	jogRelease(0, +1, 0);	break;
 	case '8':	jogRelease(0, 0, -1);	break;
 	case '9':	jogRelease(0, 0, +1);	break;
+	case 'a':
+		alternateJogMode = false;
+		break;
 	case 'z':
 		rotateMode = false;
 		break;
+	}
+}
+
+// ==========================================================
+
+POINTS mouseJoggingStartPos, mouseJoggingCurrentPos;
+POINTS mouseAlteringStartPos, mouseAlteringCurrentPos;
+bool isMouseJogging = false;
+bool isMouseAltering = false;
+
+void Fractal::lButtonDown(LPARAM lParam) {
+	mouseJoggingStartPos = MAKEPOINTS(lParam);
+	mouseJoggingCurrentPos = mouseJoggingStartPos;
+	isMouseJogging = true;
+}
+
+void Fractal::lButtonUp() {
+	isMouseJogging = false;
+}
+
+void Fractal::rButtonDown(LPARAM lParam) {
+	mouseAlteringStartPos = MAKEPOINTS(lParam);
+	mouseAlteringCurrentPos = mouseAlteringStartPos;
+	isMouseAltering = true;
+}
+
+void Fractal::rButtonUp() {
+	isMouseAltering = false;
+}
+
+void Fractal::mouseMove(WPARAM wParam, LPARAM lParam) {
+	if (isMouseJogging && (wParam & MK_LBUTTON))
+		mouseJoggingCurrentPos = MAKEPOINTS(lParam);
+	else
+		isMouseJogging = false;
+
+	if (isMouseAltering && (wParam & MK_RBUTTON))
+		mouseAlteringCurrentPos = MAKEPOINTS(lParam);
+	else
+		isMouseAltering = false;
+}
+
+void Fractal::mouseTimerHandler() {
+	if (isMouseJogging) {
+		XMFLOAT4 amt = XMFLOAT4(0, 0, 0, 0);
+		float scale = 0.001;
+		amt.x = float(mouseJoggingCurrentPos.x - mouseJoggingStartPos.x) * scale;
+		amt.y = -float(mouseJoggingCurrentPos.y - mouseJoggingStartPos.y) * scale;
+
+		if (alternateJogMode) { // vertical mouse movements = move Z axis instead
+			amt.z = amt.y;
+			amt.y = 0;
+		}
+
+		moveCamera(amt);
+		isDirty = true;
+	}
+
+	if (isMouseAltering) {
+		updateAlterationSpeed();
+		widget.alterationDirection = mouseAlteringCurrentPos.x - mouseAlteringStartPos.x;
+		if (widget.isAltering())
+			isDirty = true;
+		widget.alterationDirection = 0;
 	}
 }
 
