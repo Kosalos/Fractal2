@@ -56,20 +56,22 @@ char* WidgetData::valueString() {
 		return value ? "Yes" : "No";
 	}
 
-	float value = *(float*)valuePtr;
-
-	if (kind == kinteger)
-		sprintf_s(str, LEGEND_LENGTH, "%d", int(value));
-	else
-		sprintf_s(str, LEGEND_LENGTH, "%5.3f", value);
+	if (kind == kinteger) {
+		int value = *(int*)valuePtr;
+		sprintf_s(str, LEGEND_LENGTH, "%3d", value);
+	}
+	else {
+		float value = *(float*)valuePtr;
+		sprintf_s(str, LEGEND_LENGTH, "%8.5f", value);
+	}
 	return str;
 }
 
 char* WidgetData::displayString() {
 	static char str[LEGEND_LENGTH + 1];
 
-	if (showValue)
-		sprintf_s(str, LEGEND_LENGTH, "%s : %s", legend, valueString());
+	if (kind == kinteger || kind == kfloat)
+		sprintf_s(str, LEGEND_LENGTH, "%-22s : %s", legend, valueString());
 	else
 		strcpy_s(str, LEGEND_LENGTH, legend);
 
@@ -135,7 +137,7 @@ void Widget::create(HWND parent, HINSTANCE hInstance) {
 		exit(-1);
 	}
 
-	RECT rc2 = { 100, 100, 100+200,650 };
+	RECT rc2 = { 100, 100, 100+300,650 };
 	AdjustWindowRect(&rc2, WS_OVERLAPPEDWINDOW, FALSE);
 
 	hWnd = CreateWindow(CLASS_NAME, "Parameters", WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT, rc2.right - rc2.left, rc2.bottom - rc2.top, parent, NULL, hInstance, NULL);
@@ -163,6 +165,8 @@ void Widget::drawText(int x, int y, const char* str) {
 #define YTOP 10
 #define YHOP 16
 
+HFONT font = NULL;
+
 void Widget::drawWindow() {
 	PAINTSTRUCT ps;
 	hdc = BeginPaint(hWnd, &ps);
@@ -174,6 +178,18 @@ void Widget::drawWindow() {
 	FillRect(hdc, &rect, GetSysColorBrush(COLOR_BTNFACE));
 
 	SetBkMode(hdc, TRANSPARENT);
+
+	if (font == NULL) {
+		font = CreateFont(20, 8, 0, 0,
+			FW_NORMAL,
+			FALSE, FALSE, FALSE,
+			ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+			DEFAULT_PITCH | FF_ROMAN,
+			"Courier New");
+	}
+
+	SelectObject(hdc, font);
 
 	for (int i = 0; i < count; ++i) {
 		SetTextColor(hdc, i == focus ? RGB(255, 0, 0) : RGB(0, 0, 0));
@@ -277,7 +293,7 @@ bool Widget::isAltering() {
 	if (alterationDirection == 0) return false;
 
 	if (data[focus].alterValue(alterationDirection)) {
-		if (data[focus].showValue) refresh();
+		refresh();
 	}
 
 	return true;

@@ -85,9 +85,16 @@ static const char* helptext[] = {
 "Add <Z> to Rotate the view direction rather than jog",
 " ",
 "G: Select next coloring style",
-" ",
 "Press <Spacebar> to Toggle Visibility of Parameter Window ",
-""
+" ",
+"Mouse Commands:",
+"Left Mouse Button + Drag = Move Camera in X and Y axes",
+"Hold down 'A' while dragging  to Move Camera in X and Z axes",
+"Hold down 'Z' while dragging  to Rotate Camera",
+"Mouse Wheel moves Parameter focus up/down",
+"Right Mouse Button + Drag = Alter focused parameter",
+
+"",  // must mark end of list with an empty string!
 };
 
 void Help::addHelptext() {
