@@ -1,8 +1,6 @@
 #pragma once
 
-#include <windows.h>
-#include <d3d11.h>  
-#include <string>
+#include "stdafx.h"
 #include "Fractal.h"
 #include "View.h"	
 
@@ -30,6 +28,14 @@ class Widget
 public:
 	HWND hWnd;
 	HDC hdc;
+	HFONT font;
+
+	HDC hdcMem;
+	HBITMAP hbmMem, hbmOld;
+	HBRUSH hbrBkGnd;
+	HFONT hfntOld;
+	RECT rc;
+
 	WidgetData data[MAX_WIDGETS];
 	int count;
 	int focus;
@@ -39,6 +45,13 @@ public:
 	Widget() {
 		hWnd = NULL;
 		hdc = NULL;
+		font = NULL;
+		hdcMem = NULL;
+		hbmMem = NULL;
+		hbmOld = NULL;
+		hbrBkGnd = NULL;
+		hfntOld = NULL;
+		rc.left = 0;
 		count = 0;
 		focus = 0;
 		isVisible = false;
@@ -66,7 +79,6 @@ public:
 	void jumpToPreviousFocus();
 	void refresh();
 	void drawWindow();
-	void drawText(int x, int y, const char* str);
 	void toggleVisible();
 	bool isAltering();
 	const char* focusString();

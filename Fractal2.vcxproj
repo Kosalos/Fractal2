@@ -89,6 +89,7 @@
     <ClCompile Include="source\Help.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\SaveLoad.cpp" />
     <ClCompile Include="source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
@@ -111,6 +112,7 @@
     <ClInclude Include="source\cShader.h" />
     <ClInclude Include="source\Help.h" />
     <ClInclude Include="source\pShader.h" />
+    <ClInclude Include="source\SaveLoad.h" />
     <ClInclude Include="source\stdafx.h" />
     <ClInclude Include="source\View.h" />
     <ClInclude Include="source\Fractal.h" />

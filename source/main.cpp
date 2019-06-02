@@ -3,12 +3,13 @@
 #include "Fractal.h"
 #include "Widget.h"
 #include "Help.h"
+#include "SaveLoad.h"
 
 HWND g_hWnd = NULL;
-ID3D11Device* pd3dDevice = nullptr;
-ID3D11DeviceContext* pImmediateContext = nullptr;
-IDXGISwapChain* pSwapChain = nullptr;
-ID3D11RenderTargetView* pRenderTargetView = nullptr;
+static ID3D11Device* pd3dDevice = nullptr;
+static ID3D11DeviceContext* pImmediateContext = nullptr;
+static IDXGISwapChain* pSwapChain = nullptr;
+static ID3D11RenderTargetView* pRenderTargetView = nullptr;
 
 #ifdef SAFE_RELEASE
 #undef SAFE_RELEASE
@@ -28,7 +29,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_EXITSIZEMOVE:
 		windowSizePositionChanged();
 		return 0;
-	case WM_IME_NOTIFY :
+	case WM_IME_NOTIFY:
 		return 0;
 	case WM_CREATE:
 		SetTimer(hWnd, 1, 100, NULL);
@@ -60,13 +61,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 		fractal.mouseMove(wParam, lParam);
 		break;
-	case WM_MOUSEHWHEEL :
-	case WM_MOUSEWHEEL :
+	case WM_MOUSEWHEEL:
 	{
 		int direction = GET_WHEEL_DELTA_WPARAM(wParam);
-		widget.moveFocus(-direction/120);
+		widget.moveFocus(-direction / 120);
 	}
-		break;
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -76,8 +76,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-#define CLASS_NAME  "MainWin"
-#define WINDOW_NAME "Fractal"
+static char* CLASS_NAME = "MainWin";
+static char* WINDOW_NAME = "Fractal";
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 	WNDCLASSEX wcex;
@@ -118,6 +118,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 
 	widget.create(g_hWnd, hInstance);
 	help.create(g_hWnd, hInstance);
+	saveLoad.create(g_hWnd, hInstance);
 	return S_OK;
 }
 
@@ -167,7 +168,7 @@ HRESULT InitializeD3D11(HWND hWnd) {
 	// Create Device, DeviceContext, SwapChain, FeatureLevel
 	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++) {
 		driverType = driverTypes[driverTypeIndex];
-		hr = D3D11CreateDeviceAndSwapChain(NULL, driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, 
+		hr = D3D11CreateDeviceAndSwapChain(NULL, driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION,
 			&sd, &pSwapChain, &pd3dDevice, &featureLevel, &pImmediateContext);
 		if (SUCCEEDED(hr)) break;
 	}
@@ -195,8 +196,8 @@ void windowSizePositionChanged() {
 	if (xs != windowWidth || ys != windowHeight) {
 		windowWidth = xs;
 		windowHeight = ys;
-		control.xSize = xs; 
-		control.ySize = ys;
+		XSIZE = xs;
+		YSIZE = ys;
 
 		LRESULT ret = InitializeD3D11(g_hWnd);
 		ABORT(ret);
@@ -246,7 +247,7 @@ int WINAPI wWinMain(
 
 	SAFE_RELEASE(pRenderTargetView);
 	SAFE_RELEASE(pSwapChain);
-	view.Destory();
+	view.Destroy();
 	return (int)msg.wParam;
 }
 

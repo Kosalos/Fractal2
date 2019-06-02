@@ -1,7 +1,7 @@
 // Control structure definition for HLSL
 #ifdef SHADER
-#define F4 float4
-#define I4 int4
+#define FLOAT4 float4
+#define INTEGER4 int4
 #define Q1 P0.x	// individual float names
 #define Q2 P0.y
 #define Q3 P0.z
@@ -19,6 +19,26 @@
 #define QF P3.z
 #define QG P3.w
 
+#define XSIZE			CI1.x
+#define YSIZE			CI1.y
+#define EQUATION		CI1.z
+#define MAXSTEPS		CI1.w
+#define DOINVERSION		CI2.x
+#define ISSTEREO		CI2.y
+#define COLORSCHEME		CI2.z
+#define JULIAMODE		CI2.w
+#define SHOWBALLS		I1.x
+#define FOURGEN			I1.y
+#define FINALITERATIONS I1.z
+#define BOXITERATIONS	I1.w
+#define PREABSX			I2.x
+#define PREABSY			I2.y
+#define PREABSZ			I2.z
+#define ABSX			I2.w
+#define ABSY			I3.x
+#define ABSZ			I3.y
+#define USEDELTADE		I3.z
+
 #define INVERSION_X			inv1.x
 #define INVERSION_Y			inv1.y
 #define INVERSION_Z			inv1.z
@@ -35,12 +55,9 @@ cbuffer Control : register(b0)
 #else
 // Control structure definition for C++
 #pragma once
-#include <windows.h>
-#include <d3d11.h>
-#include <DirectXMath.h>
+#include "stdafx.h"
 
-using namespace DirectX;
-
+#define _CRT_SECURE_NO_WARNINGS
 #pragma warning( disable : 4305 ) // double as float
 #pragma warning( disable : 4244 ) // double as float
 #pragma warning( disable : 4127 ) // constexpr
@@ -48,8 +65,8 @@ using namespace DirectX;
 void abortProgram(char* name, int line);
 #define ABORT(hr) if(FAILED(hr)) { abortProgram(__FILE__,__LINE__); }
 
-#define F4 XMFLOAT4
-#define I4 XMINT4
+#define FLOAT4 XMFLOAT4
+#define INTEGER4 XMINT4
 #define Q1 control.P0.x
 #define Q2 control.P0.y
 #define Q3 control.P0.z
@@ -66,6 +83,26 @@ void abortProgram(char* name, int line);
 #define QE control.P3.y
 #define QF control.P3.z
 #define QG control.P3.w
+
+#define XSIZE			control.CI1.x
+#define YSIZE			control.CI1.y
+#define EQUATION		control.CI1.z
+#define MAXSTEPS		control.CI1.w
+#define DOINVERSION		control.CI2.x
+#define ISSTEREO		control.CI2.y
+#define COLORSCHEME		control.CI2.z
+#define JULIAMODE		control.CI2.w
+#define SHOWBALLS		control.I1.x
+#define FOURGEN			control.I1.y
+#define FINALITERATIONS control.I1.z
+#define BOXITERATIONS	control.I1.w
+#define PREABSX			control.I2.x
+#define PREABSY			control.I2.y
+#define PREABSZ			control.I2.z
+#define ABSX			control.I2.w
+#define ABSY			control.I3.x
+#define ABSZ			control.I3.y
+#define USEDELTADE		control.I3.z
 
 #define INVERSION_X			control.inv1.x
 #define INVERSION_Y			control.inv1.y
@@ -84,35 +121,17 @@ struct Control
 
 // Control structure definition.  ensure 16 byte alighment
 {
-	F4 camera;
-	F4 viewVector, topVector, sideVector;
-	F4 P0, P1, P2, P3, P4, P5, P6;
+	FLOAT4 camera;
+	FLOAT4 viewVector, topVector, sideVector;
+	FLOAT4 P0, P1, P2, P3, P4, P5, P6;
 
-	F4 inv1, inv2;
-	F4 julia;	
-	F4 light; 
-	F4 lightPosition;
+	FLOAT4 inv1, inv2;
+	FLOAT4 julia;
+	FLOAT4 light;
+	FLOAT4 lightPosition;
 
-	int xSize;
-	int ySize;
-	int equation;
-	int maxSteps;
-	int doInversion;
-	int juliaboxMode;
-	int showBalls;
-	int fourGen;
-	int finalIterations;
-	int boxIterations;
-	int colorScheme;
-	int isStereo;
-	int preabsx;
-	int preabsy;
-	int preabsz;
-	int absx;
-	int absy;
-	int absz;
-	int useDeltaDE;
-	int unused;
+	INTEGER4 CI1, CI2;
+	INTEGER4 I1, I2, I3, I4;
 };
 
 #define EQU_01_MANDELBULB 1

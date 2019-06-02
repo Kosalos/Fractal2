@@ -1,10 +1,9 @@
-#include "stdafx.h"
 #include "common.h"
 #include "Help.h"
 
 Help help;
 
-#define CLASS_NAME2  "Help"
+static char* CLASS_NAME = "Help";
 
 LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -21,6 +20,16 @@ LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 			break;
 		}
 		break;
+	case WM_ERASEBKGND:
+	{
+		RECT rc;
+		HDC hdc = (HDC)wParam;
+		GetClientRect(hWnd, &rc);
+		FillRect(hdc, &rc, CreateSolidBrush(RGB(200, 235, 200)));
+		return 1L;
+	}
+	break;
+
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -40,14 +49,14 @@ void Help::create(HWND parent, HINSTANCE hInstance) {
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = CLASS_NAME2;
+	wcex.lpszClassName = CLASS_NAME;
 	wcex.hIconSm = NULL;
 	if (!RegisterClassEx(&wcex)) ABORT(-1);
 
 	RECT rc2 = { 10, 10, 500,600 };
 	AdjustWindowRect(&rc2, WS_OVERLAPPEDWINDOW, FALSE);
 
-	hWnd = CreateWindow(CLASS_NAME2, "Help", WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT, rc2.right - rc2.left, rc2.bottom - rc2.top, parent, NULL, hInstance, NULL);
+	hWnd = CreateWindow(CLASS_NAME, "Help", WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT, rc2.right - rc2.left, rc2.bottom - rc2.top, parent, NULL, hInstance, NULL);
 	if (hWnd == NULL) ABORT(-1);
 
 	ShowWindow(hWnd, SW_HIDE);
@@ -93,7 +102,10 @@ static const char* helptext[] = {
 "Hold down 'Z' while dragging  to Rotate Camera",
 "Mouse Wheel moves Parameter focus up/down",
 "Right Mouse Button + Drag = Alter focused parameter",
-
+" ",
+"Save/Load:",
+"Press 'S' to save the current settings to file.",
+"Press 'L' to launch the Save/Load dialog.",
 "",  // must mark end of list with an empty string!
 };
 

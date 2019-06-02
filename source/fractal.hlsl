@@ -63,7 +63,7 @@ float DE_MANDELBULB(float3 pos) {
 	float dr = 1;
 	float r, theta, phi, pwr, ss;
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		r = length(pos);
 		if (r > 2) break;
 
@@ -92,7 +92,7 @@ float DE_APOLLONIAN(float3 pos) {
 	float k, t = Q3 + 0.25 * cos(Q4 * PI * Q1 * (pos.z - pos.x));
 	float scale = 1;
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = -1.0 + 2.0 * frac(0.5 * pos + 0.5);
 		k = Q2 * t / dot(pos, pos);
 		pos *= k;
@@ -113,7 +113,7 @@ float DE_APOLLONIAN2(float3 pos) {
 	float t = Q3 + 0.25 * cos(Q4 * PI * Q1 * (pos.z - pos.x));
 	float scale = 1;
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = -1.0 + 2.0 * frac(0.5 * pos + 0.5);
 		pos -= sign(pos) * Q2 / 20;
 
@@ -155,15 +155,15 @@ float JosKleinian(float3 z) {
 	float a = Q3, b = Q4;
 	float f = sign(b);
 
-	for (int i = 0; i < boxIterations; ++i) {
+	for (int i = 0; i < BOXITERATIONS; ++i) {
 		z.x = z.x + b / a * z.y;
-		if (fourGen != 0)
+		if (FOURGEN != 0)
 			z = wrap(z, float3(2. * Q1, a, 2. * Q2), float3(-Q1, 0., -Q2));
 		else
 			z.xz = wrap(z.xz, float2(2.0 * Q1, 2.0 * Q2), float2(-Q1, -Q2));
 		z.x = z.x - b / a * z.y;
 
-		//If above the separation line, rotate by 1808 about (-b/2, a/2)
+		//If above the separation line, rotate by 180 about (-b/2, a/2)
 		if (z.y >= a * (0.5 + f * 0.25 * sign(z.x + b * 0.5) * (1. - exp(-3.2 * abs(z.x + b * 0.5)))))
 			z = float3(-b, a, 0.) - z;
 
@@ -184,8 +184,8 @@ float JosKleinian(float3 z) {
 	}
 
 	//WIP: Push the iterated point left or right depending on the sign of KleinI
-	for (int j = 0; j < finalIterations; ++j) {
-		float y = showBalls != 0 ? min(z.y, a - z.y) : z.y;
+	for (int j = 0; j < FINALITERATIONS; ++j) {
+		float y = SHOWBALLS != 0 ? min(z.y, a - z.y) : z.y;
 		DE = min(DE, min(y, Q5) / max(DF, Q6));
 
 		//Apply transformation a
@@ -196,7 +196,7 @@ float JosKleinian(float3 z) {
 		DF *= iR;
 	}
 
-	float y = showBalls != 0 ? min(z.y, a - z.y) : z.y;
+	float y = SHOWBALLS != 0 ? min(z.y, a - z.y) : z.y;
 	DE = min(DE, min(y, Q5) / max(DF, Q6));
 
 	return DE;
@@ -205,7 +205,7 @@ float JosKleinian(float3 z) {
 float DE_KLEINIAN(float3 pos) {
 	float result = 0;
 
-	if (doInversion != 0) {
+	if (DOINVERSION != 0) {
 		pos = pos - inv1.xyz;
 		float r = length(pos);
 		float r2 = r * r;
@@ -239,14 +239,14 @@ float boxFold2(float v, float fold) { // http://www.fractalforums.com/new-theori
 }
 
 float DE_MANDELBOX(float3 pos) {
-	float3 c = juliaboxMode != 0 ? julia.xyz : pos;
+	float3 c = JULIAMODE != 0 ? julia.xyz : pos;
 	float r2, dr = Q1;
 
 	float fR2 = Q3 * Q3;
 	float mR2 = Q4 * Q4;
 
-	for (int i = 0; i < maxSteps; ++i) {
-		if (doInversion != 0) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
+		if (DOINVERSION != 0) {
 			pos.x = boxFold(pos.x, Q2);
 			pos.y = boxFold(pos.y, Q2);
 			pos.z = boxFold(pos.z, Q2);
@@ -290,7 +290,7 @@ float DE_QUATJULIA(float3 pos) {
 	float4 z = float4(pos, 0);
 	float mz2 = dot(z, z);
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		md2 *= 4.0 * mz2;
 		nz.x = z.x * z.x - dot(z.yzw, z.yzw);
 		nz.yzw = 2.0 * z.x * z.yzw;
@@ -384,7 +384,7 @@ float DE_GOLD(float3 pos) {
 	float3 offset1 = float3(Q1, Q2, Q3);
 	float4 offset2 = float4(Q4, Q5, Q6, Q7);
 
-	for (int n = 0; n < maxSteps; ++n) {
+	for (int n = 0; n < MAXSTEPS; ++n) {
 		q.xyz = abs(q.xyz) - offset1;
 		q = 2.0 * q / clamp(dot(q.xyz, q.xyz), 0.4, 1.0) - offset2;
 	}
@@ -472,7 +472,7 @@ float DE_KLEINIAN2(float3 pos) {
 float DE_SIERPINSKI_T(float3 pos) {
 	int i;
 
-	for (i = 0; i < maxSteps; ++i) {
+	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q3);
 
 		if (pos.x + pos.y < 0.0) pos.xy = -pos.yx;
@@ -497,7 +497,7 @@ float DE_SIERPINSKI_T(float3 pos) {
 float DE_HALF_TETRA(float3 pos) {
 	int i;
 
-	for (i = 0; i < maxSteps; ++i) {
+	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q3);
 
 		if (pos.x - pos.y < 0.0) pos.xy = pos.yx;
@@ -523,7 +523,7 @@ float DE_HALF_TETRA(float3 pos) {
 float DE_KALEIDO(float3 pos) {
 	int i;
 
-	for (i = 0; i < maxSteps; ++i) {
+	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q4);
 
 		pos = abs(pos);
@@ -644,7 +644,7 @@ float DE_KALIBOX(float3 pos) {
 	float4 p = float4(pos, 1);
 	float4 p0 = float4(julia.xyz, 1);  // p.w is the distance estimate
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 
 		// p.xyz*=rot;
 		p.xyz = rotatePosition(p.xyz, 0, Q9);
@@ -653,7 +653,7 @@ float DE_KALIBOX(float3 pos) {
 		p.xyz = abs(p.xyz) + P4.xyz;
 		float r2 = dot(p.xyz, p.xyz);
 		p *= clamp(max(Q2 / r2, Q2), 0.0, 1.0);  // dp3,div,max.sat,mul
-		p = p * P5 + (juliaboxMode != 0 ? p0 : float4(0,0,0,0));
+		p = p * P5 + (JULIAMODE != 0 ? p0 : float4(0,0,0,0));
 	}
 
 	return ((length(p.xyz) - QC) / p.w - QD);
@@ -666,7 +666,7 @@ float DE_FLOWER(float3 pos) {
 	float4 q = float4(pos, 1);
 	float4 juliaOffset = float4(julia.xyz , 0);
 
-	for (int i = 0; i < maxSteps; ++i) { //kaliset fractal with no mirroring offset
+	for (int i = 0; i < MAXSTEPS; ++i) { //kaliset fractal with no mirroring offset
 		q.xyz = abs(q.xyz);
 		float r = dot(q.xyz, q.xyz);
 		q /= clamp(r, 0.0, Q1);
@@ -684,7 +684,7 @@ float DE_ALEK_BULB(float3 pos) {
 	float dr = 1;
 	float r, mcangle, theta, pwr;
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		r = length(pos);
 		if (r > 8) break;
 
@@ -725,13 +725,13 @@ float surfBoxFold(float v, float fold, float foldModX) {
 }
 
 float DE_SURFBOX(float3 pos) {
-	float3 c = juliaboxMode != 0 ? julia.xyz : pos;
+	float3 c = JULIAMODE != 0 ? julia.xyz : pos;
 	float r2, dr = Q6;
 	float fR2 = Q3 * Q3;
 	float mR2 = Q4 * Q4;
 	float foldMod = Q1 * Q2; 
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos.x = surfBoxFold(pos.x, Q1, foldMod);
 		pos.y = surfBoxFold(pos.y, Q1, foldMod);
 		pos.z = surfBoxFold(pos.z, Q1, foldMod);
@@ -767,7 +767,7 @@ float DE_KALI_RONTGEN(float3 pos) {
 	float4 p = float4(pos, 1.);
 	float3 param = float3(Q1, Q2, Q3);
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		p = abs(p) / dot(p.xyz, p.xyz);
 
 		d = min(d, (length(p.xy - float2(0, .01)) - .03) / p.w);
@@ -801,7 +801,7 @@ float DE_VERTEBRAE(float3 pos) {
 	float4 z = float4(pos, 0);
 	float mz2 = dot(z, z);
 
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		md2 *= 4.0 * mz2;
 		nz.x = z.x * z.x - dot(z.yzw, z.yzw);
 		nz.yzw = 2.0 * z.x * z.yzw;
@@ -827,9 +827,9 @@ float DE_VERTEBRAE(float3 pos) {
 // Q3 deltaDE
 
 float3 BuffaloIteration(float3 z) {
-	if (preabsx) z.x = abs(z.x);
-	if (preabsy) z.y = abs(z.y);
-	if (preabsz) z.z = abs(z.z);
+	if (PREABSX) z.x = abs(z.x);
+	if (PREABSY) z.y = abs(z.y);
+	if (PREABSZ) z.z = abs(z.z);
 
 	float x2 = z.x * z.x;
 	float y2 = z.y * z.y;
@@ -839,9 +839,9 @@ float3 BuffaloIteration(float3 z) {
 	float newy = Q1 * z.x * z.y * temp;
 	float newz = -Q1 * z.z * sqrt(x2 + y2);
 
-	z.x = absx ? abs(newx) : newx;
-	z.y = absy ? abs(newy) : newy;
-	z.z = absz ? abs(newz) : newz;
+	z.x = ABSX ? abs(newx) : newx;
+	z.y = ABSY ? abs(newy) : newy;
+	z.z = ABSZ ? abs(newz) : newz;
 	return z;
 }
 
@@ -854,10 +854,10 @@ float3 DE1(float3 pos) {
 	float dr = 1.0;
 	int i = 0;
 
-	while (r < Bailout && (i < maxSteps)) {
+	while (r < Bailout && (i < MAXSTEPS)) {
 		dr = dr * 2 * r;
 		z = BuffaloIteration(z);
-		z += (juliaboxMode	!= 0 ? julia.xyz : pos);
+		z += (JULIAMODE	!= 0 ? julia.xyz : pos);
 		r = length(z);
 
 		z = rotatePosition(z, 1, Q2);
@@ -872,7 +872,7 @@ float DE_BUFFALO(float3 pos) {
 	float3 z = pos; 
 	float result = 0;
 
-	if (useDeltaDE != 0) {
+	if (USEDELTADE != 0) {
 		// Author: Krzysztof Marczak (buddhi1980@gmail.com) from  MandelbulberV2
 		float deltavalue = max(length(z) * 0.000001, Q3);
 		float3 deltaX = float3 (deltavalue, 0.0, 0.0);
@@ -904,10 +904,10 @@ float DE_BUFFALO(float3 pos) {
 		float dr = 1.0;
 		int i = 0;
 
-		while (r < Bailout && (i < maxSteps)) {
+		while (r < Bailout && (i < MAXSTEPS)) {
 			dr = dr * 2 * r;
 			z = BuffaloIteration(z);
-			z += (juliaboxMode != 0 ? julia.xyz : pos);
+			z += (JULIAMODE != 0 ? julia.xyz : pos);
 			r = length(z);
 
 			z = rotatePosition(z, 1, Q2);
@@ -959,7 +959,7 @@ float sdSponge(float3 z) {
 float DE_SPONGE(float3 pos) {
 	float k, r2;
 	float scale = 1.0;
-	for (int i = 0; i < maxSteps; ++i) {
+	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = 2.0 * clamp(pos, P3.xyz, P4.xyz) - pos;
 		r2 = dot(pos, pos);
 		k = max(P3.w / r2, 1.0);
@@ -975,7 +975,7 @@ float DE_SPONGE(float3 pos) {
 float DE_Inner(float3 pos) {
 	float result = 0;
 
-	switch (equation) {
+	switch (EQUATION) {
 	case EQU_01_MANDELBULB :	result = DE_MANDELBULB(pos); break;
 	case EQU_02_APOLLONIAN :	result = DE_APOLLONIAN(pos); break;
 	case EQU_03_APOLLONIAN2 :	result = DE_APOLLONIAN2(pos); break;
@@ -1006,7 +1006,7 @@ float DE_Inner(float3 pos) {
 float DE(float3 pos) {
 	float result = 0;
 
-	if (doInversion) {
+	if (DOINVERSION) {
 		pos = pos - inv1.xyz;
 		float r = length(pos);
 		float r2 = r * r;
@@ -1098,13 +1098,13 @@ RWTexture2D<float4> OutputMap : register(u0);
 [numthreads(12,12, 1)]
 void CSMain(uint3 p:SV_DispatchThreadID)
 {
-	if (p.x >= uint(xSize) || p.y >= uint(ySize)) return;
+	if (p.x >= uint(XSIZE) || p.y >= uint(YSIZE)) return;
 
 	uint3 q = p;				// copy of current pixel coordinate; x is altered for stereo
-	uint xsize = uint(xSize);	// copy of current window size; x is altered for stereo
+	uint xsize = uint(XSIZE);	// copy of current window size; x is altered for stereo
 	float4 cam = camera;		// copy of camera position; x is altered for stereo
 	
-	if (isStereo) {
+	if (ISSTEREO) {
 		xsize /= 2;         // window x size adjusted for 2 views side by side
 		float4 offset = sideVector * PARALLAX;
 
@@ -1117,7 +1117,7 @@ void CSMain(uint3 p:SV_DispatchThreadID)
 		}
 	}
 
-	float den = float(ySize);
+	float den = float(YSIZE);
 	float dx = 1.5 * (float(q.x) / den - 0.5);
 	float dy = -1.5 * (float(q.y) / den - 0.5);
 	float3 direction = normalize((sideVector * dx) + (topVector * dy) + viewVector).xyz;
@@ -1128,7 +1128,7 @@ void CSMain(uint3 p:SV_DispatchThreadID)
 		float3 position = cam.xyz + dist.x * direction;
 		float3 cc, normal = calcNormal(position);
 
-		switch (colorScheme) {
+		switch (COLORSCHEME) {
 		case 0:
 			color += float3(1 - (normal / 10 + sqrt(dist.y / 80.0)));
 			break;

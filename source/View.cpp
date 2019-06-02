@@ -158,14 +158,14 @@ void View::UpdateControlBuffer() {
 
 // =======================================================================
 
-void View::DestoryTextures() {
+void View::DestroyTextures() {
 	SafeRelease(&texture);
 	SafeRelease(&cTexture);
 	SafeRelease(&textureView);
 	SafeRelease(&cTextureView);
 }
 
-void View::Destory() {
+void View::Destroy() {
 	SafeRelease(&vShader);
 	SafeRelease(&vLayout);
 	SafeRelease(&vBuffer);
@@ -173,7 +173,7 @@ void View::Destory() {
 	SafeRelease(&pSampler);
 	SafeRelease(&controlBuffer);
 	SafeRelease(&cShader);
-	DestoryTextures();
+	DestroyTextures();
 
 	if (context) context->ClearState();
 	SafeRelease(&context);
@@ -181,7 +181,7 @@ void View::Destory() {
 }
 
 void View::CreateTextureViews() {
-	DestoryTextures();
+	DestroyTextures();
 
 	D3D11_TEXTURE2D_DESC desc = { 0 };
 	desc.Width = windowWidth;

@@ -30,16 +30,20 @@ public:
 	void mouseMove(WPARAM wParam, LPARAM lParam);
 	void mouseTimerHandler();
 	
+	void refresh(bool resetFocus);
 	bool isDirty;
+	FLOAT alterationSpeed;
+	bool isShiftKeyPressed;
+	bool isControlKeyPressed;
 
 private:
-	void refresh(bool resetFocus);
+	XMFLOAT4 jogAmount;
+	FLOAT lightAngle;
+
 	void juliaGroup(FLOAT range, FLOAT delta);
 	void changeEquationIndex(int dir);
-
+	void saveControl();
 };
 
 extern Fractal fractal;
-extern FLOAT alterationSpeed;
-extern bool shiftDown;
-extern bool controlDown;
+extern const char* equationName[];

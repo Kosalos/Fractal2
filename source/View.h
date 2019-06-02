@@ -1,21 +1,16 @@
 #pragma once
-#include <windows.h>
-#include <d3d11.h>
 #include "common.h"
-#include <DirectXMath.h>
-
-using namespace DirectX;
 
 class View
 {
 public:
 	void	Initialize(ID3D11Device* pd3dDevice, ID3D11DeviceContext* pImmediateContext);
 	void	Render(ID3D11DeviceContext* pImmediateContext );
-	void	Destory();
+	void	Destroy();
 	void    UpdateControlBuffer();
 	void	Compute();
 	void    CreateTextureViews();
-	void	DestoryTextures();
+	void	DestroyTextures();
 
 	ID3D11Device*				device;
 	ID3D11DeviceContext*		context;
