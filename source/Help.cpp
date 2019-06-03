@@ -11,6 +11,7 @@ LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	case WM_CREATE:
 		help.hWndList = CreateWindowEx(WS_EX_CLIENTEDGE, "Listbox", "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | LBS_NOSEL, 5, 5, 480,560, hWnd, (HMENU)101, NULL, NULL);
 		CreateWindowEx(NULL, TEXT("button"), TEXT("Close"), WS_VISIBLE | WS_CHILD, 10, 565, 60, 20, hWnd, (HMENU)106, NULL, NULL);
+		SendMessage(help.hWndList, WM_SETFONT, WPARAM(help.font), 0);
 		help.addHelptext();
 		break;
 	case WM_COMMAND:
@@ -56,6 +57,14 @@ void Help::create(HWND parent, HINSTANCE hInstance) {
 	RECT rc2 = { 10, 10, 500,600 };
 	AdjustWindowRect(&rc2, WS_OVERLAPPEDWINDOW, FALSE);
 
+	font = CreateFont(14, 7, 0, 0,
+		FW_NORMAL,
+		FALSE, FALSE, FALSE,
+		ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+		DEFAULT_PITCH | FF_ROMAN,
+		"Courier New");
+
 	hWnd = CreateWindow(CLASS_NAME, "Help", WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT, rc2.right - rc2.left, rc2.bottom - rc2.top, parent, NULL, hInstance, NULL);
 	if (hWnd == NULL) ABORT(-1);
 
@@ -70,7 +79,6 @@ void Help::launch() {
 
 static const char* helptext[] = {
 "Use the Arrow Keys to control the Parameters:",
-" ",
 "Up / Dn Arrows : Move Parameter focus",
 "Lt / Rt Arrows : Alter value of focused Parameter",
 " ",
@@ -94,6 +102,7 @@ static const char* helptext[] = {
 "Add <Z> to Rotate the view direction rather than jog",
 " ",
 "G: Select next coloring style",
+"P: Save image to BMP file",
 "Press <Spacebar> to Toggle Visibility of Parameter Window ",
 " ",
 "Mouse Commands:",

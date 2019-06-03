@@ -161,6 +161,7 @@ void View::UpdateControlBuffer() {
 void View::DestroyTextures() {
 	SafeRelease(&texture);
 	SafeRelease(&cTexture);
+	SafeRelease(&bmpTexture);
 	SafeRelease(&textureView);
 	SafeRelease(&cTextureView);
 }
@@ -194,13 +195,21 @@ void View::CreateTextureViews() {
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	desc.MiscFlags = 0;
 
+	// rendering texture
 	desc.Usage = D3D11_USAGE_DYNAMIC;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	if (FAILED(device->CreateTexture2D(&desc, NULL, &texture))) ABORT(-1);
 
+	// compute shader texture
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	if (FAILED(device->CreateTexture2D(&desc, NULL, &cTexture))) ABORT(-1);
+
+	// save to .BMP file texture
+	desc.Usage = D3D11_USAGE_STAGING;
+	desc.BindFlags = 0;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+	if (FAILED(device->CreateTexture2D(&desc, NULL, &bmpTexture))) ABORT(-1);
 
 	// --------------------------------------------------------------------
 	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;

@@ -180,7 +180,7 @@ void Widget::create(HWND parent, HINSTANCE hInstance) {
 		exit(-1);
 	}
 
-	CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 50, 510, 80, 30, hWnd, (HMENU)BTN_BUTTON1, 0, 0);
+	CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 100, 510, 80, 30, hWnd, (HMENU)BTN_BUTTON1, 0, 0);
 
 	isVisible = true;
 	ShowWindow(hWnd, SW_SHOWNORMAL);

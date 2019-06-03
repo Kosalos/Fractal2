@@ -22,12 +22,13 @@ public:
 	ID3D11PixelShader*			pShader;
 	ID3D11SamplerState*			pSampler;
 
-	ID3D11Texture2D*			texture;
+	ID3D11Texture2D*			texture;	// texture for screen rendering on textured quad
 	ID3D11ShaderResourceView*	textureView;
 
 	ID3D11Buffer*               controlBuffer;
 	ID3D11ComputeShader*		cShader;
-    ID3D11Texture2D*            cTexture;
+    ID3D11Texture2D*            cTexture;	// texture for compute shader
+    ID3D11Texture2D*            bmpTexture; // texture for saving to bmp file
     ID3D11UnorderedAccessView*  cTextureView;
 };
 

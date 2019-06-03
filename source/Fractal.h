@@ -42,7 +42,7 @@ private:
 
 	void juliaGroup(FLOAT range, FLOAT delta);
 	void changeEquationIndex(int dir);
-	void saveControl();
+	void saveImageToFile();
 };
 
 extern Fractal fractal;

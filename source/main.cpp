@@ -6,10 +6,11 @@
 #include "SaveLoad.h"
 
 HWND g_hWnd = NULL;
-static ID3D11Device* pd3dDevice = nullptr;
-static ID3D11DeviceContext* pImmediateContext = nullptr;
+ID3D11Device* pd3dDevice = nullptr;
+ID3D11DeviceContext* pImmediateContext = nullptr;
 static IDXGISwapChain* pSwapChain = nullptr;
 static ID3D11RenderTargetView* pRenderTargetView = nullptr;
+ID3D11Texture2D* pBackBuffer = NULL;
 
 #ifdef SAFE_RELEASE
 #undef SAFE_RELEASE
@@ -22,6 +23,7 @@ static ID3D11RenderTargetView* pRenderTargetView = nullptr;
 void windowSizePositionChanged();
 
 // ---------------------------------------------------------------------
+void WriteToBmp(const char* inFilePath);
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -164,6 +166,7 @@ HRESULT InitializeD3D11(HWND hWnd) {
 	SAFE_RELEASE(pd3dDevice);
 	SAFE_RELEASE(pImmediateContext);
 	SAFE_RELEASE(pRenderTargetView);
+	SAFE_RELEASE(pBackBuffer);
 
 	// Create Device, DeviceContext, SwapChain, FeatureLevel
 	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++) {
@@ -176,12 +179,12 @@ HRESULT InitializeD3D11(HWND hWnd) {
 
 	// Create Render Target View Object from SwapChain's Back Buffer.
 	// Access one of swap chain's back buffer.[0-based buffer index, interface type which manipulates buffer, output param]
-	ID3D11Texture2D* pBackBuffer = NULL;
+//	ID3D11Texture2D* pBackBuffer = NULL;
 	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)& pBackBuffer);
 	ABORT(hr);
 
 	hr = pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
-	pBackBuffer->Release();
+//	pBackBuffer->Release();
 	ABORT(hr);
 
 	return S_OK;

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <time.h>
 #include "Fractal.h"
 #include "View.h"
 #include "Widget.h"
@@ -1025,6 +1026,9 @@ void Fractal::keyDown(int key) {
 	case 'l':
 		saveLoad.launch();
 		break;
+	case 'p' :
+		saveImageToFile();
+		break;
 	}
 }
 
@@ -1158,22 +1162,20 @@ void Fractal::updateWindowTitle() {
 
 // ==========================================
 
-void Fractal::saveControl() {
-	OPENFILENAME ofn;
-	char szFileName[MAX_PATH] = "";
+void WriteToBmp(const char* inFilePath);
 
-	ZeroMemory(&ofn, sizeof(ofn));
+void Fractal::saveImageToFile() {
+	time_t rawtime;
+	struct tm timeinfo;
+	static char buffer[32],str[128];
 
-	ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
-	ofn.hwndOwner = g_hWnd;
-	ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
-	ofn.lpstrFile = szFileName;
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrDefExt = "txt";
+	time(&rawtime);
+	localtime_s(&timeinfo, &rawtime);
+	strftime(buffer, 127, "Fractal_%y%m%d%H%M%S.bmp", &timeinfo);
 
-	if (GetOpenFileName(&ofn))
-	{
-		// Do something usefull with the filename stored in szFileName 
-	}
+	WriteToBmp(buffer);
+
+	sprintf_s(str, 127, "Saved to: %s", buffer);
+	MessageBox(NULL, str, "Image Saved", MB_ICONEXCLAMATION | MB_OK);
+
 }
