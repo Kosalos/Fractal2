@@ -39,6 +39,13 @@
 #define ABSZ			I3.y
 #define USEDELTADE		I3.z
 
+#define TONOFF			I3.w
+#define	TXSIZE			I4.x
+#define	TYSIZE			I4.y
+#define TSCALE          P6.x
+#define TCENTERX        P6.y
+#define TCENTERY        P6.z
+
 #define INVERSION_X			inv1.x
 #define INVERSION_Y			inv1.y
 #define INVERSION_Z			inv1.z
@@ -64,6 +71,9 @@ cbuffer Control : register(b0)
 
 void abortProgram(char* name, int line);
 #define ABORT(hr) if(FAILED(hr)) { abortProgram(__FILE__,__LINE__); }
+
+template <class T>
+void SafeRelease(T** ppT) { if (*ppT) { (*ppT)->Release(); *ppT = NULL; } }
 
 #define FLOAT4 XMFLOAT4
 #define INTEGER4 XMINT4
@@ -103,6 +113,13 @@ void abortProgram(char* name, int line);
 #define ABSY			control.I3.x
 #define ABSZ			control.I3.y
 #define USEDELTADE		control.I3.z
+
+#define TONOFF			control.I3.w
+#define	TXSIZE			control.I4.x
+#define	TYSIZE			control.I4.y
+#define TSCALE          control.P6.x
+#define TCENTERX        control.P6.y
+#define TCENTERY        control.P6.z
 
 #define INVERSION_X			control.inv1.x
 #define INVERSION_Y			control.inv1.y

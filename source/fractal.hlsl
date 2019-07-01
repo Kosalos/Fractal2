@@ -1128,6 +1128,23 @@ void CSMain(uint3 p:SV_DispatchThreadID)
 		float3 position = cam.xyz + dist.x * direction;
 		float3 cc, normal = calcNormal(position);
 
+		// use texture
+		if (TONOFF != 0) {
+			float len = length(position) / dist.x;
+			float x = normal.x / len;
+			float y = normal.z / len;
+			float w = float(TXSIZE);
+			float h = float(TYSIZE);
+			float xx = w + (TCENTERX * w + x * TSCALE) * (w + len); 
+			float yy = h + (TCENTERY * h + y * TSCALE) * (h + len); 
+
+			uint2 pt;
+			pt.x = uint(fmod(xx, w));
+			pt.y = uint(TYSIZE - fmod(yy, h)); // flip Y coord
+
+			color = InputMap[pt].xyz;
+		}
+
 		switch (COLORSCHEME) {
 		case 0:
 			color += float3(1 - (normal / 10 + sqrt(dist.y / 80.0)));

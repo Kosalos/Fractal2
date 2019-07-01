@@ -4,6 +4,8 @@
 #include "Widget.h"
 #include "Help.h"
 #include "SaveLoad.h"
+#include "WICTextureLoader.h"
+
 
 HWND g_hWnd = NULL;
 ID3D11Device* pd3dDevice = nullptr;
@@ -21,8 +23,6 @@ ID3D11Texture2D* pBackBuffer = NULL;
 #endif
 
 void windowSizePositionChanged();
-
-// ---------------------------------------------------------------------
 void WriteToBmp(const char* inFilePath);
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -176,15 +176,13 @@ HRESULT InitializeD3D11(HWND hWnd) {
 		if (SUCCEEDED(hr)) break;
 	}
 	ABORT(hr);
-
+	
 	// Create Render Target View Object from SwapChain's Back Buffer.
 	// Access one of swap chain's back buffer.[0-based buffer index, interface type which manipulates buffer, output param]
-//	ID3D11Texture2D* pBackBuffer = NULL;
 	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)& pBackBuffer);
 	ABORT(hr);
 
 	hr = pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
-//	pBackBuffer->Release();
 	ABORT(hr);
 
 	return S_OK;
@@ -250,6 +248,17 @@ int WINAPI wWinMain(
 
 	SAFE_RELEASE(pRenderTargetView);
 	SAFE_RELEASE(pSwapChain);
+
+
+
+	SAFE_RELEASE(pSwapChain);
+	SAFE_RELEASE(pd3dDevice);
+	SAFE_RELEASE(pImmediateContext);
+	SAFE_RELEASE(pRenderTargetView);
+	SAFE_RELEASE(pBackBuffer);
+
+
+
 	view.Destroy();
 	return (int)msg.wParam;
 }

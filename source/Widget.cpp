@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Widget.h"
 #include "Fractal.h"
 #include "Help.h"
@@ -170,7 +171,7 @@ void Widget::create(HWND parent, HINSTANCE hInstance) {
 		exit(-1);
 	}
 
-	RECT rc2 = { 100, 100, 100 + 300,650 };
+	RECT rc2 = { 100, 100, 100 + 220,650 };
 	AdjustWindowRect(&rc2, WS_OVERLAPPEDWINDOW, FALSE);
 
 	hWnd = CreateWindow(CLASS_NAME, "Parameters", WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
@@ -180,13 +181,13 @@ void Widget::create(HWND parent, HINSTANCE hInstance) {
 		exit(-1);
 	}
 
-	CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 100, 510, 80, 30, hWnd, (HMENU)BTN_BUTTON1, 0, 0);
+	CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 60, 510, 80, 30, hWnd, (HMENU)BTN_BUTTON1, 0, 0);
 
 	isVisible = true;
 	ShowWindow(hWnd, SW_SHOWNORMAL);
 	SetFocus(hWnd);
 
-	font = CreateFont(20, 8, 0, 0,
+	font = CreateFont(16, 7, 0, 0,
 		FW_NORMAL,
 		FALSE, FALSE, FALSE,
 		ANSI_CHARSET, OUT_DEFAULT_PRECIS,
@@ -202,7 +203,7 @@ void Widget::toggleVisible() {
 
 void Widget::drawWindow() {
 #define YTOP 10
-#define YHOP 16
+#define YHOP 14
 	PAINTSTRUCT ps;
 	hdc = BeginPaint(hWnd, &ps);
 	int x = 5;

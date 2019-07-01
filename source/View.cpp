@@ -9,9 +9,6 @@ View view;
 int windowWidth;
 int windowHeight;
 
-template <class T>
-void SafeRelease(T** ppT) { if (*ppT) { (*ppT)->Release(); *ppT = NULL; } }
-
 struct SimpleVertex {
 	XMFLOAT3 Pos;
 	XMFLOAT2 Tex;
@@ -100,8 +97,12 @@ void View::Initialize(ID3D11Device* pd3dDevice, ID3D11DeviceContext* pImmediateC
 	context->CSSetConstantBuffers(0, 1, &controlBuffer);
 }
 
+extern ID3D11Texture2D* srcTexture;
+extern ID3D11ShaderResourceView* srcTextureView;
+
 void View::Compute() {
 	context->CSSetShader(cShader, NULL, 0);
+	context->CSSetShaderResources(0, 1, &srcTextureView);
 	context->CSSetUnorderedAccessViews(0, 1, &cTextureView, NULL);
 	context->CSSetConstantBuffers(0, 1, &controlBuffer);
 	context->CSSetSamplers(0, 1, &pSampler);
@@ -167,6 +168,8 @@ void View::DestroyTextures() {
 }
 
 void View::Destroy() {
+	SafeRelease(&srcTexture);
+	SafeRelease(&srcTextureView);
 	SafeRelease(&vShader);
 	SafeRelease(&vLayout);
 	SafeRelease(&vBuffer);
@@ -175,10 +178,6 @@ void View::Destroy() {
 	SafeRelease(&controlBuffer);
 	SafeRelease(&cShader);
 	DestroyTextures();
-
-	if (context) context->ClearState();
-	SafeRelease(&context);
-	SafeRelease(&device);
 }
 
 void View::CreateTextureViews() {

@@ -5,7 +5,7 @@
 #include "View.h"	
 
 enum WidgetKind { kinteger, kfloat, klegend, kboolean };
-#define MAX_WIDGETS 32
+#define MAX_WIDGETS 40
 #define LEGEND_LENGTH 63
 
 struct WidgetData {

@@ -103,6 +103,7 @@
     <ClCompile Include="source\main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\WICTextureLoader.cpp" />
     <ClCompile Include="source\Widget.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
@@ -118,6 +119,7 @@
     <ClInclude Include="source\View.h" />
     <ClInclude Include="source\Fractal.h" />
     <ClInclude Include="source\vShader.h" />
+    <ClInclude Include="source\WICTextureLoader.h" />
     <ClInclude Include="source\Widget.h" />
   </ItemGroup>
   <ItemGroup>

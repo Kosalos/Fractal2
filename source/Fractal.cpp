@@ -4,6 +4,7 @@
 #include "View.h"
 #include "Widget.h"
 #include "SaveLoad.h"
+#include "WICTextureLoader.h"
 
 Fractal fractal;
 
@@ -717,6 +718,15 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("   Angle", &INVERSION_ANGLE, -10, 10, 0.01, kfloat);
 	}
 
+	widget.addLegend("");
+	widget.addBoolean("K: Add Texture", &TONOFF);
+
+	if (TONOFF) {
+		widget.addEntry("   Scale", &TSCALE, 0.1,20,0.1, kfloat);
+		widget.addEntry("   Center X", &TCENTERX, 0,1,0.01, kfloat);
+		widget.addEntry("   Center Y", &TCENTERY, 0, 1, 0.01, kfloat);
+	}
+
 	if (!resetFocus) widget.jumpToPreviousFocus();
 	widget.refresh();
 }
@@ -917,6 +927,64 @@ void Fractal::changeEquationIndex(int dir) {
 	updateWindowTitle();
 }
 
+#include <iostream>
+#include <tchar.h>
+
+extern ID3D11Device* pd3dDevice;
+extern ID3D11DeviceContext* pImmediateContext;
+ID3D11Texture2D* srcTexture = NULL;
+ID3D11ShaderResourceView* srcTextureView = NULL;
+
+void Fractal::toggleTexture() {
+	if (TONOFF != 0) {
+		TONOFF = 0;
+		return;
+	}
+	TONOFF = 0;
+
+	char szFileName[MAX_PATH] = { 0 };
+
+	OPENFILENAME  ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = NULL;
+	ofn.hInstance = NULL;
+	ofn.lpstrFilter = "Image Files\0*.png; *.bmp; *.jpg\0";
+	ofn.lpstrFile = szFileName;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrTitle = "Select Texture File";
+	ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
+
+	if (!GetOpenFileName(&ofn))
+		return;
+
+	size_t size = strlen(szFileName) + 1;
+	wchar_t wName[MAX_PATH];
+	size_t outSize;
+	mbstowcs_s(&outSize, wName, size, szFileName, size - 1);
+
+	SafeRelease(&srcTexture);
+	SafeRelease(&srcTextureView);
+
+	int w, h;
+
+	HRESULT hr = CreateWICTextureFromFile(pd3dDevice,
+		pImmediateContext,
+		wName,
+		(ID3D11Resource * *)& srcTexture,
+		&srcTextureView,
+		w, h);
+
+	if (SUCCEEDED(hr)) {
+		TONOFF = 1;
+		TXSIZE = w;
+		TYSIZE = h;
+		TSCALE = 1;
+		TCENTERX = 0.5;
+		TCENTERY = 0.5;
+	}
+}
+
 void Fractal::keyDown(int key) {
 	//char str[32];
 	//sprintf_s(str,31, "KD %d %c\n", key, key);
@@ -1028,6 +1096,10 @@ void Fractal::keyDown(int key) {
 		break;
 	case 'p' :
 		saveImageToFile();
+		break;
+	case 'k' :
+		toggleTexture();
+		refresh(false);
 		break;
 	}
 }

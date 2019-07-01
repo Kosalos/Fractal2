@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "common.h"
 #include "Help.h"
 
@@ -7,7 +8,7 @@ static char* CLASS_NAME = "Help";
 
 LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message) {
+	switch (message) { 
 	case WM_CREATE:
 		help.hWndList = CreateWindowEx(WS_EX_CLIENTEDGE, "Listbox", "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | LBS_NOSEL, 5, 5, 480,560, hWnd, (HMENU)101, NULL, NULL);
 		CreateWindowEx(NULL, TEXT("button"), TEXT("Close"), WS_VISIBLE | WS_CHILD, 10, 565, 60, 20, hWnd, (HMENU)106, NULL, NULL);
@@ -115,6 +116,13 @@ static const char* helptext[] = {
 "Save/Load:",
 "Press 'S' to save the current settings to file.",
 "Press 'L' to launch the Save/Load dialog.",
+" ",
+"K: Load image file to add 'texture' to fractal objects.",
+"   Press 'K' to launch file picker dialog.",
+"   Select .png,.bmp,.jpg  image to add on top of fractal.",
+"   Scaling and centering widgets control texture position.",
+"   Press 'K' a second time to turn texturing back off.",
+
 "",  // must mark end of list with an empty string!
 };
 
