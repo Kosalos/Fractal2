@@ -34,7 +34,7 @@ bool WidgetData::alterValue(int direction) {
 		int value = *(int*)valuePtr;
 		int oldValue = value;
 
-		value += direction;
+		value += direction * delta;
 		value = max(min(value, int(rangey)), int(rangex));
 
 		if (value != oldValue) {
@@ -59,37 +59,48 @@ bool WidgetData::alterValue(int direction) {
 char* WidgetData::valueString() {
 	static char str[LEGEND_LENGTH + 1] = { 0 };
 	switch (kind) {
-	case kboolean: {
+	case kboolean:
+	{
 		bool value = *(bool*)valuePtr;
 		return value ? "Yes" : "No";
 	}
-				   break;
-	case kinteger: {
+	break;
+	case kinteger:
+	{
 		int value = *(int*)valuePtr;
 		sprintf_s(str, LEGEND_LENGTH, "%3d", value);
 	}
-				   break;
-	case kfloat: {
+	break;
+	case kfloat:
+	{
 		float value = *(float*)valuePtr;
-		sprintf_s(str, LEGEND_LENGTH, "%8.5f", value);
+		if (value > 1000)
+			sprintf_s(str, LEGEND_LENGTH, "%8.2f", value);
+		else
+			sprintf_s(str, LEGEND_LENGTH, "%8.5f", value);
 	}
-				 break;
+	break;
 	}
 	return str;
 }
 
-char* WidgetData::displayString() {
+char* WidgetData::displayString(bool showV) {
 	static char str[LEGEND_LENGTH + 1];
 
-	switch (kind) {
-	case kfloat:
-	case kinteger:
-	case kboolean:
-		sprintf_s(str, LEGEND_LENGTH, "%-22s : %s", legend, valueString());
-		break;
-	default:
+	if (showV) {
+		switch (kind) {
+		case kfloat:
+		case kinteger:
+		case kboolean:
+			sprintf_s(str, LEGEND_LENGTH, "%-22s : %s", legend, valueString());
+			break;
+		default:
+			strcpy_s(str, LEGEND_LENGTH, legend);
+			break;
+		}
+	}
+	else {
 		strcpy_s(str, LEGEND_LENGTH, legend);
-		break;
 	}
 
 	return str;
@@ -225,7 +236,7 @@ void Widget::drawWindow() {
 	for (int i = 0; i < count; ++i) {
 		SetTextColor(hdcMem, i == focus ? RGB(255, 0, 0) : RGB(0, 0, 0));
 
-		str = data[i].displayString();
+		str = data[i].displayString(true);
 		TextOut(hdcMem, x, y, str, strlen(str));
 
 		y += YHOP;
@@ -389,4 +400,4 @@ void Widget::reset() {
 }
 
 void Widget::refresh() { InvalidateRect(hWnd, NULL, TRUE); }
-const char* Widget::focusString() { return data[focus].displayString(); }
+const char* Widget::focusString(bool showV) { return data[focus].displayString(showV); }

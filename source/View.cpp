@@ -102,7 +102,8 @@ extern ID3D11ShaderResourceView* srcTextureView;
 
 void View::Compute() {
 	context->CSSetShader(cShader, NULL, 0);
-	context->CSSetShaderResources(0, 1, &srcTextureView);
+	if(TONOFF != 0 && srcTextureView != NULL)
+		context->CSSetShaderResources(0, 1, &srcTextureView);
 	context->CSSetUnorderedAccessViews(0, 1, &cTextureView, NULL);
 	context->CSSetConstantBuffers(0, 1, &controlBuffer);
 	context->CSSetSamplers(0, 1, &pSampler);
@@ -147,6 +148,7 @@ void View::Render(ID3D11DeviceContext* pImmediateContext) {
 }
 
 // =======================================================================
+
 void View::UpdateControlBuffer() {
 	D3D11_MAPPED_SUBRESOURCE MappedResource = { 0 };
 

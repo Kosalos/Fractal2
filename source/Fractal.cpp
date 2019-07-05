@@ -288,6 +288,20 @@ void Fractal::reset() {
 			inversionSettings(0.07199999, 0.070000015, 0.037999995, 0.33999994, 0.44);
 		}
 		break;
+	case EQU_20_FULL_TETRA:
+		control.camera = XMFLOAT4(-0.018542236, -0.08817809, -0.90810966, 0);
+		Q1 = 1.1280007;
+		Q2 = 8.099955;
+		Q3 = -1.2150029;
+		Q4 = -0.018401254;
+		MAXSTEPS = 71;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(-0.018542236, -0.08817809, -0.90810966, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.0069999956, 0.03999999, 0.22400002, 0.3, 0.4399999);
+		}
+		break;
 	case EQU_24_KALEIDO:
 		control.camera = XMFLOAT4(-0.00100744, -0.1640267, -1.7581517, 0);
 		Q1 = 1.1259973;
@@ -319,6 +333,32 @@ void Fractal::reset() {
 			inversionSettings(0.5320001, 0.012000054, -0.023999948, 0.36999995, 0.15);
 		}
 		break;
+	case EQU_28_QUATJULIA2:
+		control.camera = XMFLOAT4(-0.010578117, -0.49170083, -2.4, 0);
+		MAXSTEPS = 7;
+		Q1 = -1.7499995;
+		control.julia = XMFLOAT4(0, 0, 0, 0);
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(-0.010578117, -0.49170083, -2.4, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.1, .006000016, -0.072, 0.51, 0.1);
+		}
+		break;
+	case EQU_29_MBROT:
+		control.camera = XMFLOAT4(-0.23955467, -0.3426069, -2.4, 0);
+		MAXSTEPS = 10;
+		Q1 = -9.685755e-08;
+		control.julia.x = 0.39999992;
+		control.julia.y = 5.399997;
+		control.julia.z = -2.3;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(0.39044535, -0.1694704, -0.16614081, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.4520001, -0.148, 0.626, 0.16999993, 0.07000001);
+		}
+		break;
 	case EQU_30_KALIBOX:
 		control.camera = XMFLOAT4(0.32916373, -0.42756003, -3.6908724, 0);
 		Q1 = 1.6500008;
@@ -339,6 +379,25 @@ void Fractal::reset() {
 			inversionSettings(0.16800001, -0.080000006, -0.39400005, 0.96000016, 0.1);
 		}
 		break;
+	case EQU_31_SPUDS:
+		control.camera = XMFLOAT4(0.98336715, -1.2565054, -3.960955, 0);
+		Q1 = 3.7524672;
+		Q2 = 1.0099992;
+		Q3 = 1.0059854;
+		Q4 = 1.0534152;
+		Q5 = 3.2999988;
+		Q6 = 1.1883448;
+		Q7 = 4.100001;
+		Q8 = 3.2119942;
+		MAXSTEPS = 8;
+		BRIGHT = 0.92;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(0.18336754, -0.29131955, -4.057477, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(-0.544, -0.18200001, -0.44799998, 1.3700002, 0.1);
+		}
+		break;
 	case EQU_34_FLOWER:
 		control.camera = XMFLOAT4(-0.16991696, -2.5964863, -12.54011, 0);
 		Q1 = 1.6740334;
@@ -352,6 +411,21 @@ void Fractal::reset() {
 			control.camera = XMFLOAT4(-0.16991696, -2.5964863, -12.54011, 0);
 			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
 			inversionSettings(0.03800006, 0.162, 0.11799997, 0.7099998, 0.18000002);
+		}
+		break;
+	case EQU_37_SPIRALBOX:
+		control.camera = XMFLOAT4(0.047575176, -0.122939646, 1.5686907, 0);
+		Q1 = 0.8810008;
+		control.julia.x = 1.9000009;
+		control.julia.y = 1.0999998;
+		control.julia.z = 0.19999993;
+		MAXSTEPS = 9;
+		JULIAMODE = 1;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(0.047575176, -0.122939646, 1.5686907, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.1, 0.07600006, -0.46800002, 2.31, 0.1);
 		}
 		break;
 	case EQU_38_ALEK_BULB:
@@ -390,6 +464,24 @@ void Fractal::reset() {
 			control.camera = XMFLOAT4(-0.37710285, 0.4399976, -5.937426, 0);
 			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
 			inversionSettings(0.10799999, 0.19999999, 0.1, 0.47000003, -0.15999997);
+		}
+		break;
+	case EQU_40_TWISTBOX:
+		control.camera = XMFLOAT4(0.24289839, -2.1800025, -9.257425, 0);
+		MAXSTEPS = 24;
+		Q1 = 1.5611011;
+		Q2 = 8.21999;
+		control.julia.x = 3.2779012;
+		control.julia.y = -3.0104024;
+		control.julia.z = -3.2913034;
+		BRIGHT = 1.7;
+		CONTRAST = 0.18;
+		JULIAMODE = 1;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(0.23289838, 0.048880175, -1.2394277, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.068000056, 0.1, 0.029999983, 0.24000005, -0.7099997);
 		}
 		break;
 	case EQU_41_KALI_RONTGEN:
@@ -434,6 +526,26 @@ void Fractal::reset() {
 			inversionSettings(-0.9600001, -0.5200006, -3.583999, 4.01, 3.1000001);
 		}
 		break;
+	case EQU_43_DARKSURF:
+		control.camera = XMFLOAT4(-0.4870995, -1.9200011, -1.7574148, 0);
+		Q1 = 7.1999893;
+		Q2 = 0.34999707;
+		Q3 = -1;
+		Q4 = -1.5399991; // angle1
+		Q5 = 1.0;  // n1
+		Q6 = 0.549999;
+		Q7 = 0.88503367;
+		Q9 = 0.99998015; // n2
+		QA = 1.8999794;
+		QB = 3.3499994;
+		MAXSTEPS = 10;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(-0.10709968, -0.06923248, -1.9424983, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.068000056, 0.10799999, 0.09400001, 0.13999999, -0.95000005);
+		}
+		break;
 	case EQU_44_BUFFALO:
 		control.camera = XMFLOAT4(0.008563751, -2.8381326, -0.2005394, 0);
 		updateShaderDirectionVector(XMFLOAT4(-0.0045253364, 0.73382026, 0.091496624, 0));
@@ -461,6 +573,41 @@ void Fractal::reset() {
 			inversionSettings(0.016000055, 0.08400003, 5.2619725e-08, 0.3, -2.0000002);
 		}
 		break;
+	case EQU_45_TEMPLE:
+		control.camera = XMFLOAT4(1.4945942, -0.7769, -1.71, 0);
+		Q1 = 1.9772799;
+		Q2 = 0.3100043;
+		Q3 = -1.52;
+		Q4 = 0.77;
+		Q5 = 0.6599997;
+		Q6 = 1.1499994;
+		Q7 = -3.139998;
+		Q8 = 2.6600018;
+		MAXSTEPS = 16;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(0.15459429, 0.04401703, -0.33744603, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950371, 0.99503714, 0));
+			inversionSettings(-0.07599993, 0.07000005, 0.2139999, 2.29, -0.029999984);
+		}
+		break;
+	case EQU_46_KALI3:
+		control.camera = XMFLOAT4(-0.025405688, -0.418378, -3.017353, 0);
+		Q1 = -0.5659971;
+		control.julia.x = -0.97769934;
+		control.julia.y = -0.8630977;
+		control.julia.z = -0.58009946;
+		MAXSTEPS = 40;
+		BRIGHT = 3;
+		CONTRAST = 0.1;
+		JULIAMODE = 1;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(-0.025405688, -0.12185693, -0.8561316, 0);
+			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
+			inversionSettings(0.0020000527, -0.009999948, -0.158, 0.29000002, -0.82000005);
+		}
+		break;
 	case EQU_47_SPONGE:
 		control.camera = XMFLOAT4(0.7610872, -0.7994865, -3.8773263, 0);
 		Q1 = -0.8064072;
@@ -481,6 +628,22 @@ void Fractal::reset() {
 			control.camera = XMFLOAT4(0.25108737, -0.9736173, -2.603676, 0);
 			updateShaderDirectionVector(XMFLOAT4(0.0, 0.09950372, 0.9950372, 0));
 			inversionSettings(0.35200006, 0.009999977, -0.092, 1.0600003, -0.019999992);
+		}
+		break;
+	case EQU_50_DONUTS:
+		control.camera = XMFLOAT4(-0.2254057, -7.728364, -19.269318, 0);
+		updateShaderDirectionVector(XMFLOAT4(-2.0272768e-08, 0.46378687, 0.89157283, 0));
+		Q1 = 7.9931593;
+		Q2 = 0.35945648;
+		Q3 = 2.8700645;
+		Q4 = 0.0;
+		Q5 = 0.0;
+		MAXSTEPS = 4;
+
+		if (DOINVERSION) {
+			control.camera = XMFLOAT4(-0.2254057, -7.728364, -19.269318, 0);
+			updateShaderDirectionVector(XMFLOAT4(-2.0172154e-08, 0.4614851, 0.8871479, 0));
+			inversionSettings(-1.8719988, -4.1039987, -1.367999, 7.589995, -2.7999995);
 		}
 		break;
 	}
@@ -601,6 +764,13 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("Angle1", &Q3, -4, 4, 0.01, kfloat);
 		widget.addEntry("Angle2", &Q4, -4, 4, 0.01, kfloat);
 		break;
+	case EQU_20_FULL_TETRA:
+		widget.addEntry("Iterations", &MAXSTEPS, 21, 70, 1, kinteger);
+		widget.addEntry("Scale", &Q1, 1.06, 1.16, 0.005, kfloat);
+		widget.addEntry("Y", &Q2, 4.6, 20, 0.1, kfloat);
+		widget.addEntry("Angle1", &Q3, -4, 4, 0.025, kfloat);
+		widget.addEntry("Angle2", &Q4, -4, 4, 0.025, kfloat);
+		break;
 	case EQU_24_KALEIDO:
 		widget.addEntry("Iterations", &MAXSTEPS, 10, 200, 1, kinteger);
 		widget.addEntry("Scale", &Q1, 0.5, 2, 0.0005, kfloat);
@@ -618,6 +788,20 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("Stick", &Q6, 0, 0.35, 0.02, kfloat);
 		widget.addEntry("Spin", &Q7, -15, 15, 0.05, kfloat);
 		break;
+	case EQU_28_QUATJULIA2:
+		widget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
+		widget.addEntry("Mul", &Q1, -5, 5, 0.05, kfloat);
+		widget.addEntry("Offset X", &control.julia.x, -15, 15, 0.1, kfloat);
+		widget.addEntry("Offset Y", &control.julia.y, -15, 15, 0.1, kfloat);
+		widget.addEntry("Offset Z", &control.julia.z, -15, 15, 0.1, kfloat);
+		break;
+	case EQU_29_MBROT:
+		widget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
+		widget.addEntry("Offset", &Q1, -5, 5, 0.05, kfloat);
+		widget.addEntry("Rotate X", &control.julia.x, -15, 15, 0.1, kfloat);
+		widget.addEntry("Rotate Y", &control.julia.y, -15, 15, 0.1, kfloat);
+		widget.addEntry("Rotate Z", &control.julia.z, -15, 15, 0.1, kfloat);
+		break;
 	case EQU_30_KALIBOX:
 		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
 		widget.addEntry("Scale", &Q1, -5, 5, 0.05, kfloat);
@@ -628,12 +812,28 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("Angle", &Q9, -4, 4, 0.02, kfloat);
 		juliaGroup(10, 0.01);
 		break;
+	case EQU_31_SPUDS:
+		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
+		widget.addEntry("Power", &Q5, 1.5, 12, 0.1, kfloat);
+		widget.addEntry("MinRad", &Q1, 0.1, 5, 0.1, kfloat);
+		widget.addEntry("FixedRad", &Q2, 0.1, 5, 0.02, kfloat);
+		widget.addEntry("Fold Limit", &Q3, 0.1, 5, 0.02, kfloat);
+		widget.addEntry("Fold Limit2", &Q4, 0.1, 5, 0.02, kfloat);
+		widget.addEntry("ZMUL", &Q6, 0.1, 5, 0.1, kfloat);
+		widget.addEntry("Scale", &Q7, 0.1, 5, 0.1, kfloat);
+		widget.addEntry("Scale2", &Q8, 0.1, 5, 0.1, kfloat);
+		break;
 	case EQU_34_FLOWER:
 		widget.addEntry("Iterations", &MAXSTEPS, 2, 30, 1, kinteger);
 		widget.addEntry("Scale", &Q1, 0.5, 3, 0.01, kfloat);
 		widget.addEntry("Offset X", &control.julia.x, -15, 15, 0.1, kfloat);
 		widget.addEntry("Offset Y", &control.julia.y, -15, 15, 0.1, kfloat);
 		widget.addEntry("Offset Z", &control.julia.z, -15, 15, 0.1, kfloat);
+		break;
+	case EQU_37_SPIRALBOX:
+		widget.addEntry("Iterations", &MAXSTEPS, 6, 20, 1, kinteger);
+		widget.addEntry("Fold", &Q1, 0.5, 1, 0.003, kfloat);
+		juliaGroup(2, 0.1);
 		break;
 	case EQU_38_ALEK_BULB:
 		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
@@ -648,6 +848,12 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("Sphere 1", &Q3, 0, 4, 0.01, kfloat);
 		widget.addEntry("Sphere 2", &Q4, 0, 4, 0.01, kfloat);
 		juliaGroup(10, 0.01);
+		break;
+	case EQU_40_TWISTBOX:
+		widget.addEntry("Iterations", &MAXSTEPS, 3, 60, 1, kinteger);
+		widget.addEntry("Scale Factor", &Q2, 0.6, 10, 0.02, kfloat);
+		widget.addEntry("Box", &Q1, 0, 10, 0.0001, kfloat);
+		juliaGroup(10, 0.0001);
 		break;
 	case EQU_41_KALI_RONTGEN:
 		widget.addEntry("Iterations", &MAXSTEPS, 1, 30, 1, kinteger);
@@ -675,6 +881,19 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("Offset Z", &QD, -10, 10, 0.05, kfloat);
 		widget.addEntry("Slope Z", &QG, -10, 10, 0.05, kfloat);
 		break;
+	case EQU_43_DARKSURF:
+		widget.addEntry("Iterations", &MAXSTEPS, 2, 30, 1, kinteger);
+		widget.addEntry("scale", &Q1, -10, 10, 0.002, kfloat);
+		widget.addEntry("MinRad", &Q2, -10, 10, 0.002, kfloat);
+		widget.addEntry("Scale", &Q3, -10, 10, 0.02, kfloat);
+		widget.addEntry("Fold X", &Q5, -10, 10, 0.02, kfloat); // p1
+		widget.addEntry("Fold Y", &Q6, -10, 10, 0.002, kfloat);
+		widget.addEntry("Fold Z", &Q7, -10, 10, 0.002, kfloat);
+		widget.addEntry("FoldMod X", &Q9, -10, 10, 0.002, kfloat); // p2
+		widget.addEntry("FoldMod Y", &QA, -10, 10, 0.002, kfloat);
+		widget.addEntry("FoldMod Z", &QB, -10, 10, 0.002, kfloat);
+		widget.addEntry("Angle", &Q4, -4, 4, 0.002, kfloat);
+		break;
 	case EQU_44_BUFFALO:
 		widget.addEntry("Iterations", &MAXSTEPS, 2, 60, 1, kinteger);
 		widget.addEntry("Power", &Q1, 0.1, 30, 0.01, kfloat);
@@ -692,6 +911,22 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 			widget.addEntry("DE Scale", &Q3, 0, 2, 0.01, kfloat);
 		juliaGroup(10, 0.01);
 		break;
+	case EQU_45_TEMPLE:
+		widget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
+		widget.addEntry("X", &Q1, -10, 10, 0.01, kfloat);
+		widget.addEntry("Y", &Q2, -10, 10, 0.01, kfloat);
+		widget.addEntry("Z", &Q5, -4, 4, 0.01, kfloat);
+		widget.addEntry("W", &Q6, -4, 4, 0.01, kfloat);
+		widget.addEntry("A1", &Q7, -10, 10, 0.01, kfloat);
+		widget.addEntry("A2", &Q8, -10, 10, 0.01, kfloat);
+		widget.addEntry("Ceiling", &Q4, -2, 1, 0.01, kfloat);
+		widget.addEntry("Floor", &Q3, -2, 1, 0.01, kfloat);
+		break;
+	case EQU_46_KALI3:
+		widget.addEntry("Iterations", &MAXSTEPS, 4, 60, 2, kinteger);
+		widget.addEntry("Box", &Q1, -10, 10, 0.001, kfloat);
+		juliaGroup(10, 0.001);
+		break;
 	case EQU_47_SPONGE:
 		widget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
 		widget.addEntry("minX", &Q1, -5, 5, 0.01, kfloat);
@@ -704,6 +939,14 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		widget.addEntry("maxW", &Q8, -5, 5, 0.01, kfloat);
 		widget.addEntry("Scale", &Q9, 1, 20, 1, kfloat);
 		widget.addEntry("Shape", &QA, -10, 10, 0.1, kfloat);
+		break;
+	case EQU_50_DONUTS:
+		widget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
+		widget.addEntry("X", &Q1, 0.01, 20, 0.05, kfloat);
+		widget.addEntry("Y", &Q2, 0.01, 20, 0.05, kfloat);
+		widget.addEntry("Z", &Q3, 0.01, 20, 0.05, kfloat);
+		widget.addEntry("Spread", &Q4, 0.01, 2, 0.01, kfloat);
+		widget.addEntry("Mult", &Q5, 0.01, 2, 0.01, kfloat);
 		break;
 	}
 
@@ -722,8 +965,8 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 	widget.addBoolean("K: Add Texture", &TONOFF);
 
 	if (TONOFF) {
-		widget.addEntry("   Scale", &TSCALE, 0.1,20,0.1, kfloat);
-		widget.addEntry("   Center X", &TCENTERX, 0,1,0.01, kfloat);
+		widget.addEntry("   Scale", &TSCALE, 0.1, 20, 0.1, kfloat);
+		widget.addEntry("   Center X", &TCENTERX, 0, 1, 0.01, kfloat);
 		widget.addEntry("   Center Y", &TCENTERY, 0, 1, 0.01, kfloat);
 	}
 
@@ -806,6 +1049,10 @@ void Fractal::update() {
 			control.P3.z = 1.0 / Q2 - 1.0;
 			control.P3.w = 0;
 			control.P3 = normalize4(control.P3);
+			break;
+		case EQU_20_FULL_TETRA:
+			XMFLOAT4 t0 = XMFLOAT4(-1.0, Q2 - 1.0, 1.0 / Q2 - 1.0, 0);
+			control.P4 = normalize4(t0);
 			break;
 		case EQU_25_POLYCHORA:
 			XMFLOAT4 pabc = XMFLOAT4(0, 0, 0, 1);
@@ -915,7 +1162,6 @@ void Fractal::changeEquationIndex(int dir) {
 		if (EQUATION < 1) EQUATION = EQU_MAX - 1;
 
 	DOINVERSION = 0;
-	ISSTEREO = 0;
 	PARALLAX = 0.003;
 	COLORPARAM = 25000;
 	BRIGHT = 1;
@@ -1094,10 +1340,10 @@ void Fractal::keyDown(int key) {
 	case 'l':
 		saveLoad.launch();
 		break;
-	case 'p' :
+	case 'p':
 		saveImageToFile();
 		break;
-	case 'k' :
+	case 'k':
 		toggleTexture();
 		refresh(false);
 		break;
@@ -1223,12 +1469,22 @@ const char* equationName[] = {
 "Kali Rontgen",
 "Vertebrae",
 "Buffalo Bulb",
-"Klienian Sponge"
+"Klienian Sponge",
+"Full Tetrahedron",
+"3Dickulus Quaternion Julia",
+"3Dickulus Quaternion Mandelbrot",
+"Spudsville",
+"Pupukuusikkos Spiralbox",
+"TwistBox",
+"DarkBeam Surfbox",
+"Ancient Temple",
+"Kali 3D",
+"Donuts"
 };
 
 void Fractal::updateWindowTitle() {
 	char str[512];
-	sprintf_s(str, 511, "Fractal    Equation %d: %s,    Parameter: %s", EQUATION + 1, equationName[EQUATION], widget.focusString());
+	sprintf_s(str, 511, "Fractal    Equation %d: %s,    Parameter: %s", EQUATION + 1, equationName[EQUATION], widget.focusString(false));
 	SetWindowTextA(g_hWnd, str);
 }
 
@@ -1239,7 +1495,7 @@ void WriteToBmp(const char* inFilePath);
 void Fractal::saveImageToFile() {
 	time_t rawtime;
 	struct tm timeinfo;
-	static char buffer[32],str[128];
+	static char buffer[128], str[128];
 
 	time(&rawtime);
 	localtime_s(&timeinfo, &rawtime);

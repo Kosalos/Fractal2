@@ -200,6 +200,11 @@ void windowSizePositionChanged() {
 		XSIZE = xs;
 		YSIZE = ys;
 
+		if (TONOFF != 0) { // for some reason, srcTextureView does not survive window resizing
+			TONOFF = 0;
+			fractal.refresh(false);
+		}
+
 		LRESULT ret = InitializeD3D11(g_hWnd);
 		ABORT(ret);
 

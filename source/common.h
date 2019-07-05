@@ -173,4 +173,16 @@ struct Control
 #define EQU_42_VERTEBRAE 20
 #define EQU_44_BUFFALO 21
 #define EQU_47_SPONGE 22
-#define EQU_MAX 23
+// ------------------------------------
+#define EQU_20_FULL_TETRA 23
+#define EQU_28_QUATJULIA2 24
+#define EQU_29_MBROT 25
+#define EQU_31_SPUDS 26
+#define EQU_37_SPIRALBOX 27
+#define EQU_40_TWISTBOX 28
+#define EQU_43_DARKSURF 29
+#define EQU_45_TEMPLE 30
+#define EQU_46_KALI3 31
+#define EQU_50_DONUTS 32
+#define EQU_MAX 33
+

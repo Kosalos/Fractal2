@@ -18,7 +18,7 @@ struct WidgetData {
 
 	bool alterValue(int direction);
 	char* valueString();
-	char* displayString();
+	char* displayString(bool showV);
 };
 
 // =====================================================================
@@ -81,7 +81,7 @@ public:
 	void drawWindow();
 	void toggleVisible();
 	bool isAltering();
-	const char* focusString();
+	const char* focusString(bool showV);
 };
 
 extern Widget widget;
