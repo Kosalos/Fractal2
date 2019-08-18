@@ -46,6 +46,9 @@
 #define TCENTERX        P6.y
 #define TCENTERY        P6.z
 
+#define ENHANCE			P7.x
+#define COLORROLL		P7.y
+
 #define INVERSION_X			inv1.x
 #define INVERSION_Y			inv1.y
 #define INVERSION_Z			inv1.z
@@ -121,6 +124,9 @@ void SafeRelease(T** ppT) { if (*ppT) { (*ppT)->Release(); *ppT = NULL; } }
 #define TCENTERX        control.P6.y
 #define TCENTERY        control.P6.z
 
+#define ENHANCE			control.P7.x
+#define COLORROLL		control.P7.y
+
 #define INVERSION_X			control.inv1.x
 #define INVERSION_Y			control.inv1.y
 #define INVERSION_Z			control.inv1.z
@@ -140,7 +146,7 @@ struct Control
 {
 	FLOAT4 camera;
 	FLOAT4 viewVector, topVector, sideVector;
-	FLOAT4 P0, P1, P2, P3, P4, P5, P6;
+	FLOAT4 P0, P1, P2, P3, P4, P5, P6, P7;
 
 	FLOAT4 inv1, inv2;
 	FLOAT4 julia;

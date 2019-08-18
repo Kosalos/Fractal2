@@ -1488,6 +1488,17 @@ void CSMain(uint3 p:SV_DispatchThreadID)
 		break;
 		}
 
+		float3 diff = viewVector * dist.y / 10;
+		float d1 = DE(position - diff);
+		float d2 = DE(position + diff);
+		float d3 = d1 - d2;
+		color *= (1 + (1 - d3) * ENHANCE);
+
+		float3 c2 = color;
+		color.x = mix(c2.x, c2.y, COLORROLL);
+		color.y = mix(c2.y, c2.z, COLORROLL);
+		color.z = mix(c2.z, c2.x, COLORROLL);
+
 		color *= BRIGHT;
 		color = 0.5 + (color - 0.5) * CONTRAST * 2;
 

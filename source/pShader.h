@@ -27,7 +27,7 @@
 // SV_Target                0   xyzw        0   TARGET   float   xyzw
 //
 ps_5_0
-dcl_globalFlags refactoringAllowed
+dcl_globalFlags refactoringAllowed | skipOptimization
 dcl_sampler s0, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
 dcl_input_ps linear v1.xy
@@ -39,10 +39,10 @@ ret
 
 const BYTE pShaderSource[] =
 {
-     68,  88,  66,  67,  28, 179, 
-    173, 187, 120, 104, 198,  35, 
-     51, 105,   2, 102, 119, 216, 
-      3,  20,   1,   0,   0,   0, 
+     68,  88,  66,  67, 205, 233, 
+     11, 108,  40, 229,  52,   7, 
+     11, 250,  89,  94,  70, 103, 
+    134, 232,   1,   0,   0,   0, 
     152,   2,   0,   0,   5,   0, 
       0,   0,  52,   0,   0,   0, 
     248,   0,   0,   0,  80,   1, 
@@ -52,7 +52,7 @@ const BYTE pShaderSource[] =
       0,   0,   0,   0,   0,   0, 
       0,   0,   2,   0,   0,   0, 
      60,   0,   0,   0,   0,   5, 
-    255, 255,   0,   1,   0,   0, 
+    255, 255,   5,   1,   0,   0, 
     146,   0,   0,   0,  82,  68, 
      49,  49,  60,   0,   0,   0, 
      24,   0,   0,   0,  32,   0, 
@@ -106,7 +106,7 @@ const BYTE pShaderSource[] =
     116,   0, 171, 171,  83,  72, 
      69,  88, 112,   0,   0,   0, 
      80,   0,   0,   0,  28,   0, 
-      0,   0, 106,   8,   0,   1, 
+      0,   0, 106, 136,   0,   1, 
      90,   0,   0,   3,   0,  96, 
      16,   0,   0,   0,   0,   0, 
      88,  24,   0,   4,   0, 112, 

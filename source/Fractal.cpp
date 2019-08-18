@@ -669,6 +669,9 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 	if (ISSTEREO)
 		widget.addEntry("Parallax", &PARALLAX, 0.001, 1, 0.01, kfloat);
 	widget.addEntry("Brightness", &BRIGHT, 0.01, 10, 0.02, kfloat);
+	widget.addEntry("Enhance", &ENHANCE, 0, 30, 0.03, kfloat);
+	widget.addEntry("ColorRoll", &COLORROLL, 0, 30, 0.03, kfloat);
+
 	if (COLORSCHEME == 6 || COLORSCHEME == 7)
 		widget.addEntry("Color Boost", &COLORPARAM, 1, 1200000, 200, kfloat);
 	widget.addEntry("Contrast", &CONTRAST, 0.1, 0.7, 0.02, kfloat);
