@@ -60,6 +60,30 @@
 #define SPECULAR			light.z
 #define PARALLAX			light.w
 
+// orbitTrap -------------------------------
+#define OTcycles			OTs.x
+#define OTstrength			OTs.y
+#define OTcolorXR			OTx.x
+#define OTcolorXG			OTx.y
+#define OTcolorXB			OTx.z
+#define OTcolorXW			OTx.w
+#define OTcolorYR			OTy.x
+#define OTcolorYG			OTy.y
+#define OTcolorYB			OTy.z
+#define OTcolorYW			OTy.w
+#define OTcolorZR			OTz.x
+#define OTcolorZG			OTz.y
+#define OTcolorZB			OTz.z
+#define OTcolorZW			OTz.w
+#define OTcolorRR			OTr.x
+#define OTcolorRG			OTr.y
+#define OTcolorRB			OTr.z
+#define OTcolorRW			OTr.w
+#define OTindexX			OTindex.x
+#define OTindexY			OTindex.y
+#define OTindexZ			OTindex.z
+#define OTindexR			OTindex.w
+
 cbuffer Control : register(b0)
 
 #else
@@ -138,6 +162,30 @@ void SafeRelease(T** ppT) { if (*ppT) { (*ppT)->Release(); *ppT = NULL; } }
 #define SPECULAR			control.light.z
 #define PARALLAX			control.light.w
 
+// orbitTrap -------------------------------
+#define OTcycles			control.OTs.x
+#define OTstrength			control.OTs.y
+#define OTcolorXR			control.OTx.x
+#define OTcolorXG			control.OTx.y
+#define OTcolorXB			control.OTx.z
+#define OTcolorXW			control.OTx.w
+#define OTcolorYR			control.OTy.x
+#define OTcolorYG			control.OTy.y
+#define OTcolorYB			control.OTy.z
+#define OTcolorYW			control.OTy.w
+#define OTcolorZR			control.OTz.x
+#define OTcolorZG			control.OTz.y
+#define OTcolorZB			control.OTz.z
+#define OTcolorZW			control.OTz.w
+#define OTcolorRR			control.OTr.x
+#define OTcolorRG			control.OTr.y
+#define OTcolorRB			control.OTr.z
+#define OTcolorRW			control.OTr.w
+#define OTindexX			control.OTindex.x
+#define OTindexY			control.OTindex.y
+#define OTindexZ			control.OTindex.z
+#define OTindexR			control.OTindex.w
+
 struct Control
 
 #endif
@@ -155,6 +203,11 @@ struct Control
 
 	INTEGER4 CI1, CI2;
 	INTEGER4 I1, I2, I3, I4;
+
+	// orbit Trap -----------
+	FLOAT4 OTs; // cycles, sterength, unused,unused
+	FLOAT4 OTx, OTy, OTz, OTr; // color RGB, weight
+	INTEGER4 OTindex; // color index
 };
 
 #define EQU_01_MANDELBULB 1

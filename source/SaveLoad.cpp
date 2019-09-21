@@ -204,6 +204,8 @@ void SaveLoad::saveControl() {
 
 		if (IsWindowVisible(hWnd)) fillListBox();
 	}
+
+	MessageBox(NULL, "Saved settings to File", "Success", MB_OK);
 }
 
 // user has clicked on a listbox entry. Load the parametere settings from file.

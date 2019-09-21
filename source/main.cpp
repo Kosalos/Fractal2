@@ -6,7 +6,6 @@
 #include "SaveLoad.h"
 #include "WICTextureLoader.h"
 
-
 HWND g_hWnd = NULL;
 ID3D11Device* pd3dDevice = nullptr;
 ID3D11DeviceContext* pImmediateContext = nullptr;
@@ -19,7 +18,7 @@ ID3D11Texture2D* pBackBuffer = NULL;
 #endif
 
 #ifndef SAFE_RELEASE
-#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p) = nullptr; } }
+#define SAFE_RELEASE(p) { if (p) { (p)->Release(); (p) = nullptr; } }
 #endif
 
 void windowSizePositionChanged();
@@ -66,7 +65,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL:
 	{
 		int direction = GET_WHEEL_DELTA_WPARAM(wParam);
-		widget.moveFocus(-direction / 120);
+		pWidget.moveFocus(-direction / 120);
+		cWidget.moveFocus(-direction / 120);
 	}
 	break;
 	case WM_DESTROY:
@@ -118,7 +118,12 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 	}
 	ShowWindow(g_hWnd, nCmdShow);
 
-	widget.create(g_hWnd, hInstance);
+	cWidget.create(CWIDGETS,"cWidget", "Colors",g_hWnd, hInstance,460);
+	pWidget.create(PWIDGETS,"pWidget", "Parameters", g_hWnd, hInstance,380);
+
+	cWidget.loseFocus();
+	pWidget.gainFocus();
+
 	help.create(g_hWnd, hInstance);
 	saveLoad.create(g_hWnd, hInstance);
 	return S_OK;
@@ -244,25 +249,28 @@ int WINAPI wWinMain(
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+
+			//char str[32];
+			//sprintf_s(str, 31, "msg %6d %6d\n", msg.wParam, msg.lParam);
+			//OutputDebugStringA(str);
+
 		}
 		else {
 			fractal.update();
 			Render(pImmediateContext, pRenderTargetView);
 		}
+
+		if (msg.wParam == 61536) break;	 // <Alt><F4>
 	}
 
 	SAFE_RELEASE(pRenderTargetView);
 	SAFE_RELEASE(pSwapChain);
-
-
 
 	SAFE_RELEASE(pSwapChain);
 	SAFE_RELEASE(pd3dDevice);
 	SAFE_RELEASE(pImmediateContext);
 	SAFE_RELEASE(pRenderTargetView);
 	SAFE_RELEASE(pBackBuffer);
-
-
 
 	view.Destroy();
 	return (int)msg.wParam;

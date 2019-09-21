@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "common.h"
 #include "Help.h"
+#include "Widget.h"
 
 Help help;
 
 static char* CLASS_NAME = "Help";
+static int helpID = PWIDGETS;
 
 LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -13,7 +15,6 @@ LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 		help.hWndList = CreateWindowEx(WS_EX_CLIENTEDGE, "Listbox", "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | LBS_NOSEL, 5, 5, 480,560, hWnd, (HMENU)101, NULL, NULL);
 		CreateWindowEx(NULL, TEXT("button"), TEXT("Close"), WS_VISIBLE | WS_CHILD, 10, 565, 60, 20, hWnd, (HMENU)106, NULL, NULL);
 		SendMessage(help.hWndList, WM_SETFONT, WPARAM(help.font), 0);
-		help.addHelptext();
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))	{
@@ -72,13 +73,18 @@ void Help::create(HWND parent, HINSTANCE hInstance) {
 	ShowWindow(hWnd, SW_HIDE);
 }
 
-void Help::launch() {
+void Help::launch(int id) {
+	helpID = id;
+
+	SetWindowTextA(hWnd, helpID == PWIDGETS ? "Parameter Help" : "Colors Help");
+	addHelptext();
+
 	ShowWindow(hWnd, SW_SHOWNORMAL);
 }
 
 // -------------------------------------------------------------------
 
-static const char* helptext[] = {
+static const char* pHelptext[] = {
 "Use the Arrow Keys to control the Parameters:",
 "Up / Dn Arrows : Move Parameter focus",
 "Lt / Rt Arrows : Alter value of focused Parameter",
@@ -86,7 +92,9 @@ static const char* helptext[] = {
 "Hold <Shift> key for slow changes",
 "Hold <Ctrl> key for fast changes",
 "Hold both <Shift> and <Ctrl> for very fast changes",
-"You can also mouse click on a parameter to move the focus directly",
+" ",
+"You can also mouse click on a parameter to move the focus directly,",
+"or drag mouse left/right over a parameter to change the its value.",
 " ",
 "Keyboard commands:",
 "1, 2 : Change Equation (previous, next)",
@@ -102,20 +110,40 @@ static const char* helptext[] = {
 " ",
 "Add <Z> to Rotate the view direction rather than jog",
 " ",
-"G: Select next coloring style",
-"P: Save image to BMP file",
-"Press <Spacebar> to Toggle Visibility of Parameter Window ",
+"Press <Spacebar> to Toggle Visibility of control Windows ",
+"Press <V> to Toggle Focus between Parameter and Color Window ",
 " ",
 "Mouse Commands:",
 "Left Mouse Button + Drag = Move Camera in X and Y axes",
 "Hold down 'A' while dragging  to Move Camera in X and Z axes",
 "Hold down 'Z' while dragging  to Rotate Camera",
 "Mouse Wheel moves Parameter focus up/down",
-"Right Mouse Button + Drag = Alter focused parameter",
 " ",
 "Save/Load:",
 "Press 'S' to save the current settings to file.",
 "Press 'L' to launch the Save/Load dialog.",
+" ",
+"",  // must mark end of list with an empty string!
+};
+
+static const char* cHelptext[] = {
+"OrbitTraping:",
+"All of these algorithms are 'escape-time Fractals',",
+"and by tracking certain variables as the escape is determined",
+"we learn information that can be used to",
+"enhance the fractal coloring.",
+" ",
+"New widgets have been added :",
+" ",
+"Strength : relative brightness of trap coloring, from 0 % to 100 %",
+"Cycles:    how many times the trap controls are repeated",
+" ",
+"X Color :  assign Color to channel 'x' (252 colors)",
+"X Weight : specify how much channel X adds to color, from -3 to +3",
+" ",
+"... the same 2 widgets for channels Y ... R",
+" ",
+"Keyboard commands:",
 " ",
 "K: Load image file to add 'texture' to fractal objects.",
 "   Press 'K' to launch file picker dialog.",
@@ -127,9 +155,11 @@ static const char* helptext[] = {
 };
 
 void Help::addHelptext() {
+	SendMessage(hWndList, LB_RESETCONTENT, 0, 0);
+
 	int i = 0;
 	for (;;) {
-		const char* str = helptext[i++];
+		const char* str = helpID == PWIDGETS ? pHelptext[i++] : cHelptext[i++];
 		if (strlen(str) == 0) break;
 		SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)str);
 	}

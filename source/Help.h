@@ -7,7 +7,7 @@ public:
 	HFONT font;
 
 	void create(HWND parent, HINSTANCE inst);
-	void launch();
+	void launch(int who);
 	void addHelptext();
 };
 

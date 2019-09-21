@@ -2,11 +2,13 @@
 #include <time.h>
 #include "Fractal.h"
 #include "View.h"
-#include "Widget.h"
 #include "SaveLoad.h"
 #include "WICTextureLoader.h"
+#include "ColorMap.h"
 
 Fractal fractal;
+Widget pWidget;
+Widget cWidget;
 
 extern HWND g_hWnd;
 
@@ -26,6 +28,7 @@ void Fractal::init() {
 	isControlKeyPressed = false;
 
 	reset();
+	resetColors();
 	updateWindowTitle();
 	isDirty = true;
 }
@@ -76,6 +79,27 @@ void inversionSettings(float x, float y, float z, float radius, float angle) {
 	INVERSION_Z = z;
 	INVERSION_RADIUS = radius;
 	INVERSION_ANGLE = angle;
+}
+
+void Fractal::resetColors() {
+	BRIGHT = 1;
+	CONTRAST = 0.7;
+	COLORPARAM = 4000;
+	ENHANCE = 0;
+	COLORROLL = 0;
+	lightAngle = 1.5;
+	SPECULAR = 0.2;
+	OTcycles = 0;
+	OTstrength = 0;
+	OTindexX = 10;
+	OTindexY = 110;
+	OTindexZ = 180;
+	OTindexR = 250;
+	OTcolorXW = 1;
+	OTcolorYW = 1;
+	OTcolorZW = 1;
+	OTcolorRW = 1;
+	cWidget.refresh();
 }
 
 void Fractal::reset() {
@@ -652,329 +676,351 @@ void Fractal::reset() {
 }
 
 void Fractal::juliaGroup(FLOAT range, FLOAT delta) {
-	widget.addLegend("");
-	widget.addBoolean("J: Julia Mode", &JULIAMODE);
+	pWidget.addLegend("");
+	pWidget.addBoolean("J: Julia Mode", &JULIAMODE);
 
 	if (JULIAMODE) {
-		widget.addEntry("  X", &control.julia.x, -range, range, delta, kfloat);
-		widget.addEntry("  Y", &control.julia.y, -range, range, delta, kfloat);
-		widget.addEntry("  Z", &control.julia.z, -range, range, delta, kfloat);
+		pWidget.addEntry("  X", &control.julia.x, -range, range, delta, kfloat);
+		pWidget.addEntry("  Y", &control.julia.y, -range, range, delta, kfloat);
+		pWidget.addEntry("  Z", &control.julia.z, -range, range, delta, kfloat);
 	}
 }
 
-// define widget entries for current EQUATION
+// define pWidget entries for current EQUATION
 void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
-	widget.reset();
-
-	if (ISSTEREO)
-		widget.addEntry("Parallax", &PARALLAX, 0.001, 1, 0.01, kfloat);
-	widget.addEntry("Brightness", &BRIGHT, 0.01, 10, 0.02, kfloat);
-	widget.addEntry("Enhance", &ENHANCE, 0, 30, 0.03, kfloat);
-	widget.addEntry("ColorRoll", &COLORROLL, 0, 30, 0.03, kfloat);
-
-	if (COLORSCHEME == 6 || COLORSCHEME == 7)
-		widget.addEntry("Color Boost", &COLORPARAM, 1, 1200000, 200, kfloat);
-	widget.addEntry("Contrast", &CONTRAST, 0.1, 0.7, 0.02, kfloat);
-	widget.addEntry("Spot Light Brightness", &SPECULAR, 0, 1, 0.02, kfloat);
-	widget.addEntry("Spot Light Position", &lightAngle, -3, 3, 0.3, kfloat);
-	widget.addLegend(" ");
+	pWidget.reset();
+	cWidget.reset();
 
 	switch (EQUATION) {
 	case EQU_01_MANDELBULB:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
-		widget.addEntry("Power", &Q1, 1.5, 12, 0.02, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
+		pWidget.addEntry("Power", &Q1, 1.5, 12, 0.02, kfloat);
 		break;
 	case EQU_02_APOLLONIAN:
 	case EQU_03_APOLLONIAN2:
-		widget.addEntry("Iterations", &MAXSTEPS, 2, 10, 1, kinteger);
-		widget.addEntry("Multiplier", &Q1, 10, 300, 0.2, kfloat);
-		widget.addEntry("Foam", &Q2, 0.1, 3, 0.02, kfloat);
-		widget.addEntry("Foam2", &Q3, 0.1, 3, 0.02, kfloat);
-		widget.addEntry("Bend", &Q4, 0.01, 0.03, 0.0001, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 2, 10, 1, kinteger);
+		pWidget.addEntry("Multiplier", &Q1, 10, 300, 0.2, kfloat);
+		pWidget.addEntry("Foam", &Q2, 0.1, 3, 0.02, kfloat);
+		pWidget.addEntry("Foam2", &Q3, 0.1, 3, 0.02, kfloat);
+		pWidget.addEntry("Bend", &Q4, 0.01, 0.03, 0.0001, kfloat);
 		break;
 	case EQU_04_KLEINIAN:
-		widget.addBoolean("B: ShowBalls", &SHOWBALLS);
-		widget.addBoolean("F: FourGen", &FOURGEN);
-		widget.addLegend(" ");
-		widget.addEntry("Final Iterations", &FINALITERATIONS, 1, 39, 1, kinteger);
-		widget.addEntry("Box Iterations", &BOXITERATIONS, 1, 10, 1, kinteger);
-		widget.addEntry("Box Size X", &Q1, 0.01, 2, 0.006, kfloat);
-		widget.addEntry("Box Size Z", &Q2, 0.01, 2, 0.006, kfloat);
-		widget.addEntry("Klein R", &Q3, 0.01, 2.5, 0.005, kfloat);
-		widget.addEntry("Klein I", &Q4, 0.01, 2.5, 0.005, kfloat);
-		widget.addEntry("Clamp Y", &Q5, 0.001, 2, 0.01, kfloat);
-		widget.addEntry("Clamp DF", &Q6, 0.001, 2, 0.03, kfloat);
+		pWidget.addBoolean("B: ShowBalls", &SHOWBALLS);
+		pWidget.addBoolean("F: FourGen", &FOURGEN);
+		pWidget.addLegend(" ");
+		pWidget.addEntry("Final Iterations", &FINALITERATIONS, 1, 39, 1, kinteger);
+		pWidget.addEntry("Box Iterations", &BOXITERATIONS, 1, 10, 1, kinteger);
+		pWidget.addEntry("Box Size X", &Q1, 0.01, 2, 0.006, kfloat);
+		pWidget.addEntry("Box Size Z", &Q2, 0.01, 2, 0.006, kfloat);
+		pWidget.addEntry("Klein R", &Q3, 0.01, 2.5, 0.005, kfloat);
+		pWidget.addEntry("Klein I", &Q4, 0.01, 2.5, 0.005, kfloat);
+		pWidget.addEntry("Clamp Y", &Q5, 0.001, 2, 0.01, kfloat);
+		pWidget.addEntry("Clamp DF", &Q6, 0.001, 2, 0.03, kfloat);
 		break;
 	case EQU_05_MANDELBOX:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 60, 1, kinteger);
-		widget.addEntry("Scale Factor", &Q1, 0.6, 10, 0.02, kfloat);
-		widget.addEntry("Box", &Q2, 0, 10, 0.001, kfloat);
-		widget.addEntry("Sphere 1", &Q3, 0, 4, 0.01, kfloat);
-		widget.addEntry("Sphere 2", &Q4, 0, 4, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 60, 1, kinteger);
+		pWidget.addEntry("Scale Factor", &Q1, 0.6, 10, 0.02, kfloat);
+		pWidget.addEntry("Box", &Q2, 0, 10, 0.001, kfloat);
+		pWidget.addEntry("Sphere 1", &Q3, 0, 4, 0.01, kfloat);
+		pWidget.addEntry("Sphere 2", &Q4, 0, 4, 0.01, kfloat);
 		juliaGroup(10, 0.01);
 		break;
 	case EQU_06_QUATJULIA:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
-		widget.addEntry("X", &Q1, -5, 5, 0.05, kfloat);
-		widget.addEntry("Y", &Q2, -5, 5, 0.05, kfloat);
-		widget.addEntry("Z", &Q3, -5, 5, 0.05, kfloat);
-		widget.addEntry("W", &Q4, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
+		pWidget.addEntry("X", &Q1, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("Y", &Q2, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("Z", &Q3, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("W", &Q4, -5, 5, 0.05, kfloat);
 		break;
 	case EQU_09_POLY_MENGER:
-		widget.addEntry("Menger", &Q2, 1.1, 2.9, 0.05, kfloat);
-		widget.addEntry("Stretch", &Q3, 0, 10, 0.05, kfloat);
-		widget.addEntry("Spin", &Q4, 0.1, 5, 0.05, kfloat);
-		widget.addEntry("Twist", &Q1, 0.5, 7, 0.05, kfloat);
-		widget.addEntry("Shape", &Q5, 0.1, 50, 0.2, kfloat);
+		pWidget.addEntry("Menger", &Q2, 1.1, 2.9, 0.05, kfloat);
+		pWidget.addEntry("Stretch", &Q3, 0, 10, 0.05, kfloat);
+		pWidget.addEntry("Spin", &Q4, 0.1, 5, 0.05, kfloat);
+		pWidget.addEntry("Twist", &Q1, 0.5, 7, 0.05, kfloat);
+		pWidget.addEntry("Shape", &Q5, 0.1, 50, 0.2, kfloat);
 		break;
 	case EQU_10_GOLD:
-		widget.addEntry("Iterations", &MAXSTEPS, 2, 20, 1, kinteger);
-		widget.addEntry("T", &Q1, -5, 5, 0.01, kfloat);
-		widget.addEntry("U", &Q2, -5, 5, 0.01, kfloat);
-		widget.addEntry("V", &Q3, -5, 5, 0.01, kfloat);
-		widget.addEntry("W", &Q4, -5, 5, 0.01, kfloat);
-		widget.addEntry("X", &Q5, -5, 5, 0.01, kfloat);
-		widget.addEntry("Y", &Q6, -5, 5, 0.01, kfloat);
-		widget.addEntry("Z", &Q7, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 2, 20, 1, kinteger);
+		pWidget.addEntry("T", &Q1, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("U", &Q2, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("V", &Q3, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("W", &Q4, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("X", &Q5, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("Y", &Q6, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("Z", &Q7, -5, 5, 0.01, kfloat);
 		break;
 	case EQU_11_SPIDER:
-		widget.addEntry("X", &Q1, 0.001, 5, 0.01, kfloat);
-		widget.addEntry("Y", &Q2, 0.001, 5, 0.01, kfloat);
-		widget.addEntry("Z", &Q3, 0.001, 5, 0.01, kfloat);
+		pWidget.addEntry("X", &Q1, 0.001, 5, 0.01, kfloat);
+		pWidget.addEntry("Y", &Q2, 0.001, 5, 0.01, kfloat);
+		pWidget.addEntry("Z", &Q3, 0.001, 5, 0.01, kfloat);
 		break;
 	case EQU_12_KLEINIAN2:
-		widget.addEntry("Shape", &Q9, 0.01, 2, 0.005, kfloat);
-		widget.addEntry("minX", &Q1, -5, 5, 0.01, kfloat);
-		widget.addEntry("minY", &Q2, -5, 5, 0.01, kfloat);
-		widget.addEntry("minZ", &Q3, -5, 5, 0.01, kfloat);
-		widget.addEntry("minW", &Q4, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxX", &Q5, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxY", &Q6, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxZ", &Q7, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxW", &Q8, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("Shape", &Q9, 0.01, 2, 0.005, kfloat);
+		pWidget.addEntry("minX", &Q1, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("minY", &Q2, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("minZ", &Q3, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("minW", &Q4, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxX", &Q5, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxY", &Q6, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxZ", &Q7, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxW", &Q8, -5, 5, 0.01, kfloat);
 		break;
 	case EQU_18_SIERPINSKI:
-		widget.addEntry("Iterations", &MAXSTEPS, 11, 40, 1, kinteger);
-		widget.addEntry("Scale", &Q1, 1.18, 1.8, 0.02, kfloat);
-		widget.addEntry("Y", &Q2, 0.5, 3, 0.02, kfloat);
-		widget.addEntry("Angle1", &Q3, -4, 4, 0.01, kfloat);
-		widget.addEntry("Angle2", &Q4, -4, 4, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 11, 40, 1, kinteger);
+		pWidget.addEntry("Scale", &Q1, 1.18, 1.8, 0.02, kfloat);
+		pWidget.addEntry("Y", &Q2, 0.5, 3, 0.02, kfloat);
+		pWidget.addEntry("Angle1", &Q3, -4, 4, 0.01, kfloat);
+		pWidget.addEntry("Angle2", &Q4, -4, 4, 0.01, kfloat);
 		break;
 	case EQU_19_HALF_TETRA:
-		widget.addEntry("Iterations", &MAXSTEPS, 9, 50, 1, kinteger);
-		widget.addEntry("Scale", &Q1, 1.12, 1.5, 0.02, kfloat);
-		widget.addEntry("Y", &Q2, 2, 10, 0.1, kfloat);
-		widget.addEntry("Angle1", &Q3, -4, 4, 0.01, kfloat);
-		widget.addEntry("Angle2", &Q4, -4, 4, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 9, 50, 1, kinteger);
+		pWidget.addEntry("Scale", &Q1, 1.12, 1.5, 0.02, kfloat);
+		pWidget.addEntry("Y", &Q2, 2, 10, 0.1, kfloat);
+		pWidget.addEntry("Angle1", &Q3, -4, 4, 0.01, kfloat);
+		pWidget.addEntry("Angle2", &Q4, -4, 4, 0.01, kfloat);
 		break;
 	case EQU_20_FULL_TETRA:
-		widget.addEntry("Iterations", &MAXSTEPS, 21, 70, 1, kinteger);
-		widget.addEntry("Scale", &Q1, 1.06, 1.16, 0.005, kfloat);
-		widget.addEntry("Y", &Q2, 4.6, 20, 0.1, kfloat);
-		widget.addEntry("Angle1", &Q3, -4, 4, 0.025, kfloat);
-		widget.addEntry("Angle2", &Q4, -4, 4, 0.025, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 21, 70, 1, kinteger);
+		pWidget.addEntry("Scale", &Q1, 1.06, 1.16, 0.005, kfloat);
+		pWidget.addEntry("Y", &Q2, 4.6, 20, 0.1, kfloat);
+		pWidget.addEntry("Angle1", &Q3, -4, 4, 0.025, kfloat);
+		pWidget.addEntry("Angle2", &Q4, -4, 4, 0.025, kfloat);
 		break;
 	case EQU_24_KALEIDO:
-		widget.addEntry("Iterations", &MAXSTEPS, 10, 200, 1, kinteger);
-		widget.addEntry("Scale", &Q1, 0.5, 2, 0.0005, kfloat);
-		widget.addEntry("Y", &Q2, -5, 5, 0.004, kfloat);
-		widget.addEntry("Z", &Q3, -5, 5, 0.004, kfloat);
-		widget.addEntry("Angle1", &Q4, -4, 4, 0.005, kfloat);
-		widget.addEntry("Angle2", &Q5, -4, 4, 0.005, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 10, 200, 1, kinteger);
+		pWidget.addEntry("Scale", &Q1, 0.5, 2, 0.0005, kfloat);
+		pWidget.addEntry("Y", &Q2, -5, 5, 0.004, kfloat);
+		pWidget.addEntry("Z", &Q3, -5, 5, 0.004, kfloat);
+		pWidget.addEntry("Angle1", &Q4, -4, 4, 0.005, kfloat);
+		pWidget.addEntry("Angle2", &Q5, -4, 4, 0.005, kfloat);
 		break;
 	case EQU_25_POLYCHORA:
-		widget.addEntry("Distance 1", &Q1, -2, 10, 0.1, kfloat);
-		widget.addEntry("Distance 2", &Q2, -2, 10, 0.1, kfloat);
-		widget.addEntry("Distance 3", &Q3, -2, 10, 0.1, kfloat);
-		widget.addEntry("Distance 4", &Q4, -2, 10, 0.1, kfloat);
-		widget.addEntry("Ball", &Q5, 0, 0.35, 0.02, kfloat);
-		widget.addEntry("Stick", &Q6, 0, 0.35, 0.02, kfloat);
-		widget.addEntry("Spin", &Q7, -15, 15, 0.05, kfloat);
+		pWidget.addEntry("Distance 1", &Q1, -2, 10, 0.1, kfloat);
+		pWidget.addEntry("Distance 2", &Q2, -2, 10, 0.1, kfloat);
+		pWidget.addEntry("Distance 3", &Q3, -2, 10, 0.1, kfloat);
+		pWidget.addEntry("Distance 4", &Q4, -2, 10, 0.1, kfloat);
+		pWidget.addEntry("Ball", &Q5, 0, 0.35, 0.02, kfloat);
+		pWidget.addEntry("Stick", &Q6, 0, 0.35, 0.02, kfloat);
+		pWidget.addEntry("Spin", &Q7, -15, 15, 0.05, kfloat);
 		break;
 	case EQU_28_QUATJULIA2:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
-		widget.addEntry("Mul", &Q1, -5, 5, 0.05, kfloat);
-		widget.addEntry("Offset X", &control.julia.x, -15, 15, 0.1, kfloat);
-		widget.addEntry("Offset Y", &control.julia.y, -15, 15, 0.1, kfloat);
-		widget.addEntry("Offset Z", &control.julia.z, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
+		pWidget.addEntry("Mul", &Q1, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("Offset X", &control.julia.x, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Offset Y", &control.julia.y, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Offset Z", &control.julia.z, -15, 15, 0.1, kfloat);
 		break;
 	case EQU_29_MBROT:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
-		widget.addEntry("Offset", &Q1, -5, 5, 0.05, kfloat);
-		widget.addEntry("Rotate X", &control.julia.x, -15, 15, 0.1, kfloat);
-		widget.addEntry("Rotate Y", &control.julia.y, -15, 15, 0.1, kfloat);
-		widget.addEntry("Rotate Z", &control.julia.z, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 10, 1, kinteger);
+		pWidget.addEntry("Offset", &Q1, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("Rotate X", &control.julia.x, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Rotate Y", &control.julia.y, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Rotate Z", &control.julia.z, -15, 15, 0.1, kfloat);
 		break;
 	case EQU_30_KALIBOX:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
-		widget.addEntry("Scale", &Q1, -5, 5, 0.05, kfloat);
-		widget.addEntry("MinRad2", &Q2, -5, 5, 0.05, kfloat);
-		widget.addEntry("Trans X", &Q5, -15, 15, 0.01, kfloat);
-		widget.addEntry("Trans Y", &Q6, -15, 15, 0.01, kfloat);
-		widget.addEntry("Trans Z", &Q7, -1, 5, 0.01, kfloat);
-		widget.addEntry("Angle", &Q9, -4, 4, 0.02, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
+		pWidget.addEntry("Scale", &Q1, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("MinRad2", &Q2, -5, 5, 0.05, kfloat);
+		pWidget.addEntry("Trans X", &Q5, -15, 15, 0.01, kfloat);
+		pWidget.addEntry("Trans Y", &Q6, -15, 15, 0.01, kfloat);
+		pWidget.addEntry("Trans Z", &Q7, -1, 5, 0.01, kfloat);
+		pWidget.addEntry("Angle", &Q9, -4, 4, 0.02, kfloat);
 		juliaGroup(10, 0.01);
 		break;
 	case EQU_31_SPUDS:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
-		widget.addEntry("Power", &Q5, 1.5, 12, 0.1, kfloat);
-		widget.addEntry("MinRad", &Q1, 0.1, 5, 0.1, kfloat);
-		widget.addEntry("FixedRad", &Q2, 0.1, 5, 0.02, kfloat);
-		widget.addEntry("Fold Limit", &Q3, 0.1, 5, 0.02, kfloat);
-		widget.addEntry("Fold Limit2", &Q4, 0.1, 5, 0.02, kfloat);
-		widget.addEntry("ZMUL", &Q6, 0.1, 5, 0.1, kfloat);
-		widget.addEntry("Scale", &Q7, 0.1, 5, 0.1, kfloat);
-		widget.addEntry("Scale2", &Q8, 0.1, 5, 0.1, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
+		pWidget.addEntry("Power", &Q5, 1.5, 12, 0.1, kfloat);
+		pWidget.addEntry("MinRad", &Q1, 0.1, 5, 0.1, kfloat);
+		pWidget.addEntry("FixedRad", &Q2, 0.1, 5, 0.02, kfloat);
+		pWidget.addEntry("Fold Limit", &Q3, 0.1, 5, 0.02, kfloat);
+		pWidget.addEntry("Fold Limit2", &Q4, 0.1, 5, 0.02, kfloat);
+		pWidget.addEntry("ZMUL", &Q6, 0.1, 5, 0.1, kfloat);
+		pWidget.addEntry("Scale", &Q7, 0.1, 5, 0.1, kfloat);
+		pWidget.addEntry("Scale2", &Q8, 0.1, 5, 0.1, kfloat);
 		break;
 	case EQU_34_FLOWER:
-		widget.addEntry("Iterations", &MAXSTEPS, 2, 30, 1, kinteger);
-		widget.addEntry("Scale", &Q1, 0.5, 3, 0.01, kfloat);
-		widget.addEntry("Offset X", &control.julia.x, -15, 15, 0.1, kfloat);
-		widget.addEntry("Offset Y", &control.julia.y, -15, 15, 0.1, kfloat);
-		widget.addEntry("Offset Z", &control.julia.z, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 2, 30, 1, kinteger);
+		pWidget.addEntry("Scale", &Q1, 0.5, 3, 0.01, kfloat);
+		pWidget.addEntry("Offset X", &control.julia.x, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Offset Y", &control.julia.y, -15, 15, 0.1, kfloat);
+		pWidget.addEntry("Offset Z", &control.julia.z, -15, 15, 0.1, kfloat);
 		break;
 	case EQU_37_SPIRALBOX:
-		widget.addEntry("Iterations", &MAXSTEPS, 6, 20, 1, kinteger);
-		widget.addEntry("Fold", &Q1, 0.5, 1, 0.003, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 6, 20, 1, kinteger);
+		pWidget.addEntry("Fold", &Q1, 0.5, 1, 0.003, kfloat);
 		juliaGroup(2, 0.1);
 		break;
 	case EQU_38_ALEK_BULB:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
-		widget.addEntry("Power", &Q1, 1.5, 12, 0.02, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 30, 1, kinteger);
+		pWidget.addEntry("Power", &Q1, 1.5, 12, 0.02, kfloat);
 		juliaGroup(1.6, 0.01);
 		break;
 	case EQU_39_SURFBOX:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 20, 1, kinteger);
-		widget.addEntry("Scale Factor", &Q6, 0.6, 3, 0.02, kfloat);
-		widget.addEntry("Box 1", &Q1, 0, 3, 0.002, kfloat);
-		widget.addEntry("Box 2", &Q2, 4, 5.6, 0.002, kfloat);
-		widget.addEntry("Sphere 1", &Q3, 0, 4, 0.01, kfloat);
-		widget.addEntry("Sphere 2", &Q4, 0, 4, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 20, 1, kinteger);
+		pWidget.addEntry("Scale Factor", &Q6, 0.6, 3, 0.02, kfloat);
+		pWidget.addEntry("Box 1", &Q1, 0, 3, 0.002, kfloat);
+		pWidget.addEntry("Box 2", &Q2, 4, 5.6, 0.002, kfloat);
+		pWidget.addEntry("Sphere 1", &Q3, 0, 4, 0.01, kfloat);
+		pWidget.addEntry("Sphere 2", &Q4, 0, 4, 0.01, kfloat);
 		juliaGroup(10, 0.01);
 		break;
 	case EQU_40_TWISTBOX:
-		widget.addEntry("Iterations", &MAXSTEPS, 3, 60, 1, kinteger);
-		widget.addEntry("Scale Factor", &Q2, 0.6, 10, 0.02, kfloat);
-		widget.addEntry("Box", &Q1, 0, 10, 0.0001, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 3, 60, 1, kinteger);
+		pWidget.addEntry("Scale Factor", &Q2, 0.6, 10, 0.02, kfloat);
+		pWidget.addEntry("Box", &Q1, 0, 10, 0.0001, kfloat);
 		juliaGroup(10, 0.0001);
 		break;
 	case EQU_41_KALI_RONTGEN:
-		widget.addEntry("Iterations", &MAXSTEPS, 1, 30, 1, kinteger);
-		widget.addEntry("X", &Q1, -10, 10, 0.01, kfloat);
-		widget.addEntry("Y", &Q2, -10, 10, 0.01, kfloat);
-		widget.addEntry("Z", &Q3, -10, 10, 0.01, kfloat);
-		widget.addEntry("Angle", &Q4, -4, 4, 0.02, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 1, 30, 1, kinteger);
+		pWidget.addEntry("X", &Q1, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("Y", &Q2, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("Z", &Q3, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("Angle", &Q4, -4, 4, 0.02, kfloat);
 		break;
 	case EQU_42_VERTEBRAE:
-		widget.addEntry("Iterations", &MAXSTEPS, 1, 50, 1, kinteger);
-		widget.addEntry("X", &Q1, -10, 10, 0.05, kfloat);
-		widget.addEntry("Y", &Q2, -10, 10, 0.05, kfloat);
-		widget.addEntry("Z", &Q3, -10, 10, 0.05, kfloat);
-		widget.addEntry("W", &Q4, -10, 10, 0.05, kfloat);
-		widget.addEntry("ScaleX", &Q5, -10, 10, 0.05, kfloat);
-		widget.addEntry("Sine X", &Q8, -10, 10, 0.05, kfloat);
-		widget.addEntry("Offset X", &QB, -10, 10, 0.05, kfloat);
-		widget.addEntry("Slope X", &QE, -10, 10, 0.05, kfloat);
-		widget.addEntry("ScaleY", &Q6, -10, 10, 0.05, kfloat);
-		widget.addEntry("Sine Y", &Q9, -10, 10, 0.05, kfloat);
-		widget.addEntry("Offset Y", &QC, -10, 10, 0.05, kfloat);
-		widget.addEntry("Slope Y", &QF, -10, 10, 0.05, kfloat);
-		widget.addEntry("ScaleZ", &Q7, -10, 10, 0.05, kfloat);
-		widget.addEntry("Sine Z", &QA, -10, 10, 0.05, kfloat);
-		widget.addEntry("Offset Z", &QD, -10, 10, 0.05, kfloat);
-		widget.addEntry("Slope Z", &QG, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 1, 50, 1, kinteger);
+		pWidget.addEntry("X", &Q1, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Y", &Q2, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Z", &Q3, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("W", &Q4, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("ScaleX", &Q5, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Sine X", &Q8, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Offset X", &QB, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Slope X", &QE, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("ScaleY", &Q6, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Sine Y", &Q9, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Offset Y", &QC, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Slope Y", &QF, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("ScaleZ", &Q7, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Sine Z", &QA, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Offset Z", &QD, -10, 10, 0.05, kfloat);
+		pWidget.addEntry("Slope Z", &QG, -10, 10, 0.05, kfloat);
 		break;
 	case EQU_43_DARKSURF:
-		widget.addEntry("Iterations", &MAXSTEPS, 2, 30, 1, kinteger);
-		widget.addEntry("scale", &Q1, -10, 10, 0.002, kfloat);
-		widget.addEntry("MinRad", &Q2, -10, 10, 0.002, kfloat);
-		widget.addEntry("Scale", &Q3, -10, 10, 0.02, kfloat);
-		widget.addEntry("Fold X", &Q5, -10, 10, 0.02, kfloat); // p1
-		widget.addEntry("Fold Y", &Q6, -10, 10, 0.002, kfloat);
-		widget.addEntry("Fold Z", &Q7, -10, 10, 0.002, kfloat);
-		widget.addEntry("FoldMod X", &Q9, -10, 10, 0.002, kfloat); // p2
-		widget.addEntry("FoldMod Y", &QA, -10, 10, 0.002, kfloat);
-		widget.addEntry("FoldMod Z", &QB, -10, 10, 0.002, kfloat);
-		widget.addEntry("Angle", &Q4, -4, 4, 0.002, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 2, 30, 1, kinteger);
+		pWidget.addEntry("scale", &Q1, -10, 10, 0.002, kfloat);
+		pWidget.addEntry("MinRad", &Q2, -10, 10, 0.002, kfloat);
+		pWidget.addEntry("Scale", &Q3, -10, 10, 0.02, kfloat);
+		pWidget.addEntry("Fold X", &Q5, -10, 10, 0.02, kfloat); // p1
+		pWidget.addEntry("Fold Y", &Q6, -10, 10, 0.002, kfloat);
+		pWidget.addEntry("Fold Z", &Q7, -10, 10, 0.002, kfloat);
+		pWidget.addEntry("FoldMod X", &Q9, -10, 10, 0.002, kfloat); // p2
+		pWidget.addEntry("FoldMod Y", &QA, -10, 10, 0.002, kfloat);
+		pWidget.addEntry("FoldMod Z", &QB, -10, 10, 0.002, kfloat);
+		pWidget.addEntry("Angle", &Q4, -4, 4, 0.002, kfloat);
 		break;
 	case EQU_44_BUFFALO:
-		widget.addEntry("Iterations", &MAXSTEPS, 2, 60, 1, kinteger);
-		widget.addEntry("Power", &Q1, 0.1, 30, 0.01, kfloat);
-		widget.addEntry("Angle", &Q2, -4, 4, 0.01, kfloat);
-		widget.addLegend(" ");
-		widget.addBoolean("Q: Pre Abs X", &PREABSX);
-		widget.addBoolean("W: Pre Abs Y", &PREABSY);
-		widget.addBoolean("E: Pre Abs Z", &PREABSZ);
-		widget.addBoolean("R: Abs X", &ABSX);
-		widget.addBoolean("T: Abs Y", &ABSY);
-		widget.addBoolean("Y: Abs Z", &ABSZ);
-		widget.addLegend(" ");
-		widget.addBoolean("U: Delta DE", &USEDELTADE);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 2, 60, 1, kinteger);
+		pWidget.addEntry("Power", &Q1, 0.1, 30, 0.01, kfloat);
+		pWidget.addEntry("Angle", &Q2, -4, 4, 0.01, kfloat);
+		pWidget.addLegend(" ");
+		pWidget.addBoolean("Q: Pre Abs X", &PREABSX);
+		pWidget.addBoolean("W: Pre Abs Y", &PREABSY);
+		pWidget.addBoolean("E: Pre Abs Z", &PREABSZ);
+		pWidget.addBoolean("R: Abs X", &ABSX);
+		pWidget.addBoolean("T: Abs Y", &ABSY);
+		pWidget.addBoolean("Y: Abs Z", &ABSZ);
+		pWidget.addLegend(" ");
+		pWidget.addBoolean("U: Delta DE", &USEDELTADE);
 		if (USEDELTADE != 0)
-			widget.addEntry("DE Scale", &Q3, 0, 2, 0.01, kfloat);
+			pWidget.addEntry("DE Scale", &Q3, 0, 2, 0.01, kfloat);
 		juliaGroup(10, 0.01);
 		break;
 	case EQU_45_TEMPLE:
-		widget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
-		widget.addEntry("X", &Q1, -10, 10, 0.01, kfloat);
-		widget.addEntry("Y", &Q2, -10, 10, 0.01, kfloat);
-		widget.addEntry("Z", &Q5, -4, 4, 0.01, kfloat);
-		widget.addEntry("W", &Q6, -4, 4, 0.01, kfloat);
-		widget.addEntry("A1", &Q7, -10, 10, 0.01, kfloat);
-		widget.addEntry("A2", &Q8, -10, 10, 0.01, kfloat);
-		widget.addEntry("Ceiling", &Q4, -2, 1, 0.01, kfloat);
-		widget.addEntry("Floor", &Q3, -2, 1, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
+		pWidget.addEntry("X", &Q1, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("Y", &Q2, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("Z", &Q5, -4, 4, 0.01, kfloat);
+		pWidget.addEntry("W", &Q6, -4, 4, 0.01, kfloat);
+		pWidget.addEntry("A1", &Q7, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("A2", &Q8, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("Ceiling", &Q4, -2, 1, 0.01, kfloat);
+		pWidget.addEntry("Floor", &Q3, -2, 1, 0.01, kfloat);
 		break;
 	case EQU_46_KALI3:
-		widget.addEntry("Iterations", &MAXSTEPS, 4, 60, 2, kinteger);
-		widget.addEntry("Box", &Q1, -10, 10, 0.001, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 4, 60, 2, kinteger);
+		pWidget.addEntry("Box", &Q1, -10, 10, 0.001, kfloat);
 		juliaGroup(10, 0.001);
 		break;
 	case EQU_47_SPONGE:
-		widget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
-		widget.addEntry("minX", &Q1, -5, 5, 0.01, kfloat);
-		widget.addEntry("minY", &Q2, -5, 5, 0.01, kfloat);
-		widget.addEntry("minZ", &Q3, -5, 5, 0.01, kfloat);
-		widget.addEntry("minW", &Q4, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxX", &Q5, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxY", &Q6, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxZ", &Q7, -5, 5, 0.01, kfloat);
-		widget.addEntry("maxW", &Q8, -5, 5, 0.01, kfloat);
-		widget.addEntry("Scale", &Q9, 1, 20, 1, kfloat);
-		widget.addEntry("Shape", &QA, -10, 10, 0.1, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
+		pWidget.addEntry("minX", &Q1, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("minY", &Q2, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("minZ", &Q3, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("minW", &Q4, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxX", &Q5, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxY", &Q6, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxZ", &Q7, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("maxW", &Q8, -5, 5, 0.01, kfloat);
+		pWidget.addEntry("Scale", &Q9, 1, 20, 1, kfloat);
+		pWidget.addEntry("Shape", &QA, -10, 10, 0.1, kfloat);
 		break;
 	case EQU_50_DONUTS:
-		widget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
-		widget.addEntry("X", &Q1, 0.01, 20, 0.05, kfloat);
-		widget.addEntry("Y", &Q2, 0.01, 20, 0.05, kfloat);
-		widget.addEntry("Z", &Q3, 0.01, 20, 0.05, kfloat);
-		widget.addEntry("Spread", &Q4, 0.01, 2, 0.01, kfloat);
-		widget.addEntry("Mult", &Q5, 0.01, 2, 0.01, kfloat);
+		pWidget.addEntry("Iterations", &MAXSTEPS, 1, 16, 1, kinteger);
+		pWidget.addEntry("X", &Q1, 0.01, 20, 0.05, kfloat);
+		pWidget.addEntry("Y", &Q2, 0.01, 20, 0.05, kfloat);
+		pWidget.addEntry("Z", &Q3, 0.01, 20, 0.05, kfloat);
+		pWidget.addEntry("Spread", &Q4, 0.01, 2, 0.01, kfloat);
+		pWidget.addEntry("Mult", &Q5, 0.01, 2, 0.01, kfloat);
 		break;
 	}
 
-	widget.addLegend("");
-	widget.addBoolean("I: Spherical Inversion", &DOINVERSION);
+	pWidget.addLegend("");
+	pWidget.addBoolean("I: Spherical Inversion", &DOINVERSION);
 
 	if (DOINVERSION) {
-		widget.addEntry("   X", &INVERSION_X, -5, 5, 0.002, kfloat);
-		widget.addEntry("   Y", &INVERSION_Y, -5, 5, 0.002, kfloat);
-		widget.addEntry("   Z", &INVERSION_Z, -5, 5, 0.002, kfloat);
-		widget.addEntry("   Radius", &INVERSION_RADIUS, 0.01, 10, 0.01, kfloat);
-		widget.addEntry("   Angle", &INVERSION_ANGLE, -10, 10, 0.01, kfloat);
+		pWidget.addEntry("   X", &INVERSION_X, -5, 5, 0.02, kfloat);
+		pWidget.addEntry("   Y", &INVERSION_Y, -5, 5, 0.02, kfloat);
+		pWidget.addEntry("   Z", &INVERSION_Z, -5, 5, 0.02, kfloat);
+		pWidget.addEntry("   Radius", &INVERSION_RADIUS, 0.01, 10, 0.01, kfloat);
+		pWidget.addEntry("   Angle", &INVERSION_ANGLE, -10, 10, 0.01, kfloat);
 	}
 
-	widget.addLegend("");
-	widget.addBoolean("K: Add Texture", &TONOFF);
+	//==================================================================
 
+	if (ISSTEREO)
+		cWidget.addEntry("Parallax", &PARALLAX, 0.001, 1, 0.01, kfloat);
+	cWidget.addEntry("Brightness", &BRIGHT, 0.01, 10, 0.02, kfloat);
+	cWidget.addEntry("Enhance", &ENHANCE, 0, 30, 0.03, kfloat);
+	cWidget.addEntry("ColorRoll", &COLORROLL, 0, 30, 0.03, kfloat);
+
+	if (COLORSCHEME == 6 || COLORSCHEME == 7)
+		cWidget.addEntry("Color Boost", &COLORPARAM, 1, 1200000, 200, kfloat);
+	cWidget.addEntry("Contrast", &CONTRAST, 0.1, 0.7, 0.02, kfloat);
+	cWidget.addEntry("Spot Light Brightness", &SPECULAR, 0, 1, 0.02, kfloat);
+	cWidget.addEntry("Spot Light Position", &lightAngle, -3, 3, 0.3, kfloat);
+	cWidget.addLegend(" ");
+
+	cWidget.addLegend("        -- OrbitTrap --");
+	cWidget.addEntry("Strength", &OTstrength, 0, 0.99, 0.03, kfloat);
+	cWidget.addEntry("#Cycles", &OTcycles, 0, 100, 0.2, kfloat);
+	cWidget.addLegend("");
+	cWidget.addEntry("X Color", &OTindexX, 0, 255, 5, kinteger);
+	cWidget.addEntry("Y Color", &OTindexY, 0, 255, 5, kinteger);
+	cWidget.addEntry("Z Color", &OTindexZ, 0, 255, 5, kinteger);
+	cWidget.addEntry("R Color", &OTindexR, 0, 255, 5, kinteger);
+	cWidget.addLegend("");
+	cWidget.addEntry("X Weight", &OTcolorXW, -5, 5, 0.1, kfloat);
+	cWidget.addEntry("Y Weight", &OTcolorYW, -5, 5, 0.1, kfloat);
+	cWidget.addEntry("Z Weight", &OTcolorZW, -5, 5, 0.1, kfloat);
+	cWidget.addEntry("R Weight", &OTcolorRW, -5, 5, 0.1, kfloat);
+
+	cWidget.addLegend("");
+	cWidget.addLegend("G: Select next coloring style");
+	cWidget.addLegend("C: Select next OrbitTrap palette");
+	cWidget.addLegend("P: Save image to BMP file");
+
+	cWidget.addLegend("");
+	cWidget.addBoolean("K: Add Texture", &TONOFF);
 	if (TONOFF) {
-		widget.addEntry("   Scale", &TSCALE, 0.1, 20, 0.1, kfloat);
-		widget.addEntry("   Center X", &TCENTERX, 0, 1, 0.01, kfloat);
-		widget.addEntry("   Center Y", &TCENTERY, 0, 1, 0.01, kfloat);
+		cWidget.addEntry("   Scale", &TSCALE, 0.1, 20, 0.1, kfloat);
+		cWidget.addEntry("   Center X", &TCENTERX, 0, 1, 0.01, kfloat);
+		cWidget.addEntry("   Center Y", &TCENTERY, 0, 1, 0.01, kfloat);
 	}
-
-	if (!resetFocus) widget.jumpToPreviousFocus();
-	widget.refresh();
+	
+	if (!resetFocus) pWidget.jumpToPreviousFocus();
+	pWidget.refresh();
+	cWidget.refresh();
 }
 
 XMFLOAT4 add4(XMFLOAT4 v1, XMFLOAT4 v2) {
@@ -1028,6 +1074,25 @@ void Fractal::update() {
 		control.lightPosition.y = cos(lightAngle);
 		control.lightPosition.z = -1;
 		control.lightPosition = normalize4(control.lightPosition);
+
+		// orbitTrap ---------------
+		XMFLOAT3* cMap = colorMapList[paletteIndex];
+		XMFLOAT3 color = cMap[OTindexX];
+		OTcolorXR = color.x;
+		OTcolorXG = color.y;
+		OTcolorXB = color.z;
+		color = cMap[OTindexY];
+		OTcolorYR = color.x;
+		OTcolorYG = color.y;
+		OTcolorYB = color.z;
+		color = cMap[OTindexZ];
+		OTcolorZR = color.x;
+		OTcolorZG = color.y;
+		OTcolorZB = color.z;
+		color = cMap[OTindexR];
+		OTcolorRR = color.x;
+		OTcolorRG = color.y;
+		OTcolorRB = color.z;
 
 		float dihedDodec;
 
@@ -1119,7 +1184,10 @@ void Fractal::timer() {
 	mouseTimerHandler();
 
 	// left/right arrow keys altering a parameter
-	if (widget.isAltering())
+	if (pWidget.isAltering())
+		isDirty = true;
+	else
+	if (cWidget.isAltering())
 		isDirty = true;
 
 	// number keys pressed to move/rotate camera
@@ -1135,6 +1203,9 @@ void Fractal::updateAlterationSpeed() {
 	if (isShiftKeyPressed && isControlKeyPressed) alterationSpeed *= 50; else
 		if (isShiftKeyPressed) alterationSpeed *= 0.1; else
 			if (isControlKeyPressed) alterationSpeed *= 10;
+
+	pWidget.alterationSpeed = alterationSpeed;
+	cWidget.alterationSpeed = alterationSpeed;
 }
 
 void Fractal::jogCameraAndFocusPosition(int dx, int dy, int dz) {
@@ -1242,7 +1313,8 @@ void Fractal::keyDown(int key) {
 	switch (key) {
 	case VK_ESCAPE:
 		SendMessage(g_hWnd, WM_CLOSE, 0, 0);
-		SendMessage(widget.hWnd, WM_CLOSE, 0, 0);
+		SendMessage(pWidget.hWnd, WM_CLOSE, 0, 0);
+		SendMessage(cWidget.hWnd, WM_CLOSE, 0, 0);
 		break;
 	case VK_SHIFT:
 		isShiftKeyPressed = true;
@@ -1252,15 +1324,27 @@ void Fractal::keyDown(int key) {
 		return;
 	case VK_LEFT:
 	case VK_RIGHT:
+		updateAlterationSpeed();
+		pWidget.keyDown(key);
+		cWidget.keyDown(key);
+		break;
 	case VK_DOWN:
 	case VK_UP:
-		widget.keyDown(key);
+		pWidget.keyDown(key);
+		cWidget.keyDown(key);
 		break;
 	}
 
 	switch (tolower(key)) {
 	case ' ':
-		widget.toggleVisible();
+		pWidget.toggleVisible();
+		cWidget.toggleVisible();
+		if(!cWidget.isVisible)
+			SetForegroundWindow(g_hWnd);
+		break;
+	case 'v' :
+		pWidget.toggleFocus();
+		cWidget.toggleFocus();
 		break;
 	case '1':
 		changeEquationIndex(-1);
@@ -1271,6 +1355,8 @@ void Fractal::keyDown(int key) {
 	case '3':
 		ISSTEREO = !ISSTEREO;
 		defineWidgetsForCurrentEquation(false);
+		if (ISSTEREO > 0)
+			pWidget.focus = 0;
 		isDirty = true;
 		break;
 	case '4':	jogCameraAndFocusPosition(-1, 0, 0);	break;
@@ -1350,6 +1436,11 @@ void Fractal::keyDown(int key) {
 		toggleTexture();
 		refresh(false);
 		break;
+	case 'c' :
+		if (++paletteIndex > 3) paletteIndex = 0;
+		cWidget.refresh();
+		isDirty = true;
+		break;
 	}
 }
 
@@ -1361,7 +1452,8 @@ void Fractal::keyUp(int key) {
 	switch (tolower(key)) {
 	case VK_LEFT:
 	case VK_RIGHT:
-		widget.keyUp(key);
+		pWidget.keyUp(key);
+		cWidget.keyUp(key);
 		break;
 	case VK_SHIFT:
 		isShiftKeyPressed = false;
@@ -1389,7 +1481,6 @@ void Fractal::keyUp(int key) {
 POINTS mouseJoggingStartPos, mouseJoggingCurrentPos;
 POINTS mouseAlteringStartPos, mouseAlteringCurrentPos;
 bool isMouseJogging = false;
-bool isMouseAltering = false;
 
 void Fractal::lButtonDown(LPARAM lParam) {
 	mouseJoggingStartPos = MAKEPOINTS(lParam);
@@ -1398,29 +1489,17 @@ void Fractal::lButtonDown(LPARAM lParam) {
 }
 
 void Fractal::lButtonUp() {
-	isMouseJogging = false;
+	isMouseJogging = false; 
 }
 
-void Fractal::rButtonDown(LPARAM lParam) {
-	mouseAlteringStartPos = MAKEPOINTS(lParam);
-	mouseAlteringCurrentPos = mouseAlteringStartPos;
-	isMouseAltering = true;
-}
-
-void Fractal::rButtonUp() {
-	isMouseAltering = false;
-}
+void Fractal::rButtonDown(LPARAM) {}
+void Fractal::rButtonUp() {}
 
 void Fractal::mouseMove(WPARAM wParam, LPARAM lParam) {
 	if (isMouseJogging && (wParam & MK_LBUTTON))
 		mouseJoggingCurrentPos = MAKEPOINTS(lParam);
 	else
 		isMouseJogging = false;
-
-	if (isMouseAltering && (wParam & MK_RBUTTON))
-		mouseAlteringCurrentPos = MAKEPOINTS(lParam);
-	else
-		isMouseAltering = false;
 }
 
 void Fractal::mouseTimerHandler() {
@@ -1437,14 +1516,6 @@ void Fractal::mouseTimerHandler() {
 
 		moveCamera(amt);
 		isDirty = true;
-	}
-
-	if (isMouseAltering) {
-		updateAlterationSpeed();
-		widget.alterationDirection = mouseAlteringCurrentPos.x - mouseAlteringStartPos.x;
-		if (widget.isAltering())
-			isDirty = true;
-		widget.alterationDirection = 0;
 	}
 }
 
@@ -1487,7 +1558,7 @@ const char* equationName[] = {
 
 void Fractal::updateWindowTitle() {
 	char str[512];
-	sprintf_s(str, 511, "Fractal    Equation %d: %s,    Parameter: %s", EQUATION + 1, equationName[EQUATION], widget.focusString(false));
+	sprintf_s(str, 511, "Fractal    Equation %d: %s,    Parameter: %s", EQUATION + 1, equationName[EQUATION], pWidget.focusString(false));
 	SetWindowTextA(g_hWnd, str);
 }
 

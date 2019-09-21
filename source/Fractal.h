@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DirectXMath.h>
+#include "Widget.h"
 
 using namespace DirectX;
 
@@ -29,16 +30,17 @@ public:
 	void rButtonUp();
 	void mouseMove(WPARAM wParam, LPARAM lParam);
 	void mouseTimerHandler();
-	
+	void resetColors();
+
 	void refresh(bool resetFocus);
 	bool isDirty;
-	FLOAT alterationSpeed;
+	float alterationSpeed;
 	bool isShiftKeyPressed;
 	bool isControlKeyPressed;
 
 private:
 	XMFLOAT4 jogAmount;
-	FLOAT lightAngle;
+	float lightAngle;
 
 	void juliaGroup(FLOAT range, FLOAT delta);
 	void changeEquationIndex(int dir);
@@ -48,3 +50,6 @@ private:
 
 extern Fractal fractal;
 extern const char* equationName[];
+
+extern Widget pWidget;
+extern Widget cWidget;
