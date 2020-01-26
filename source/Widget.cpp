@@ -6,7 +6,7 @@
 
 // ----------------------------------------------------------------------
 
-bool WidgetData::alterValue(int direction,float speed) {
+bool WidgetData::alterValue(int direction, float speed) {
 	switch (kind) {
 	case kfloat:
 	{
@@ -167,7 +167,7 @@ LRESULT CALLBACK WidgetWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		if (ptr != NULL) ptr->moveFocus(-direction / 120);
 	}
 	break;
-	case WM_SETFOCUS :
+	case WM_SETFOCUS:
 		if (ptr != NULL) ptr->gainFocus();
 		break;
 	case WM_KILLFOCUS:
@@ -183,7 +183,7 @@ LRESULT CALLBACK WidgetWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	return 0;
 }
 
-void Widget::create(int id,char *className,char *title,HWND parent, HINSTANCE hInstance, int height) {
+void Widget::create(int id, char* className, char* title, HWND parent, HINSTANCE hInstance, int height) {
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -206,7 +206,7 @@ void Widget::create(int id,char *className,char *title,HWND parent, HINSTANCE hI
 	RECT rc2 = { 100, 100, 100 + 280,100 + height };
 	AdjustWindowRect(&rc2, WS_OVERLAPPEDWINDOW, FALSE);
 
-	hWnd = CreateWindow(className,title, WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
+	hWnd = CreateWindow(className, title, WS_OVERLAPPED | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
 		rc2.right - rc2.left, rc2.bottom - rc2.top, parent, NULL, hInstance, NULL);
 
 	if (hWnd == NULL) {
@@ -216,8 +216,8 @@ void Widget::create(int id,char *className,char *title,HWND parent, HINSTANCE hI
 
 	ident = id;
 
-	if(ident == PWIDGETS)
-		CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 110, height-25, 65, 20, hWnd, (HMENU)HELP_BUTTON, 0, 0);
+	if (ident == PWIDGETS)
+		CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 110, height - 25, 65, 20, hWnd, (HMENU)HELP_BUTTON, 0, 0);
 	if (ident == CWIDGETS) {
 		CreateWindow(TEXT("button"), TEXT("Reset"), WS_CHILD | WS_VISIBLE, 30, height - 25, 65, 20, hWnd, (HMENU)RESET_BUTTON, 0, 0);
 		CreateWindow(TEXT("button"), TEXT("Help"), WS_CHILD | WS_VISIBLE, 180, height - 25, 65, 20, hWnd, (HMENU)HELP_BUTTON, 0, 0);
@@ -250,6 +250,33 @@ void Widget::toggleVisible() {
 	isVisible = !isVisible;
 }
 
+#define YTOP 10
+#define YHOP 14
+
+int findXColorRow() {
+	for (int i = 0; i < cWidget.count; ++i) {
+		if (!strcmp(cWidget.data[i].legend, "X Color"))
+			return YTOP + i * YHOP + 1;
+	}
+
+	return 400;
+}
+
+void Widget::colorSwatch(int colorIndex, RECT& r) {
+	XMFLOAT3* cMap = colorMapList[paletteIndex];
+	XMFLOAT3 color = cMap[colorIndex];
+	HBRUSH br = CreateSolidBrush(RGB(color.x * 255, color.y * 255, color.z * 255));
+	FillRect(hdcMem, &r, br);
+	DeleteObject(br);
+
+	HBRUSH wp = CreateSolidBrush(RGB(0, 0, 0));
+	FrameRect(hdcMem, &r, wp);
+	DeleteObject(wp);
+
+	r.top += YHOP;
+	r.bottom += YHOP;
+}
+
 void Widget::drawWindow() {
 #define YTOP 10
 #define YHOP 14
@@ -264,7 +291,7 @@ void Widget::drawWindow() {
 		hdcMem = CreateCompatibleDC(hdc);
 		hbmMem = CreateCompatibleBitmap(hdc, rc.right - rc.left, rc.bottom - rc.top);
 		hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
-		hbrBkGnd = CreateSolidBrush(RGB(230, 245, 230));
+		hbrBkGnd = CreateSolidBrush(RGB(230, 230, 230));
 		hfntOld = (HFONT)SelectObject(hdcMem, font);
 		SetBkMode(hdcMem, TRANSPARENT);
 	}
@@ -282,37 +309,14 @@ void Widget::drawWindow() {
 
 	// add colored rectangles to Colors dialog
 	if (ident == CWIDGETS) {
-		x = 230;
-		y = 166;
-		int yhop = 14;
-		RECT rect = { x,y, x + 40, y + 11 };
+		x = 235;
+		y = findXColorRow();
+		RECT rect = { x,y, x + 35, y + YHOP - 2 };
 
-		XMFLOAT3* cMap = colorMapList[paletteIndex];
-		XMFLOAT3 color = cMap[OTindexX];
-		HBRUSH br = CreateSolidBrush(RGB(color.x * 255,color.y * 255,color.z * 255));
-		FillRect(hdcMem, &rect, br);
-		DeleteObject(br);
-
-		rect.top += yhop;
-		rect.bottom += yhop;
-		color = cMap[OTindexY];
-		br = CreateSolidBrush(RGB(color.x * 255, color.y * 255, color.z * 255));
-		FillRect(hdcMem, &rect, br);
-		DeleteObject(br);
-
-		rect.top += yhop;
-		rect.bottom += yhop;
-		color = cMap[OTindexZ];
-		br = CreateSolidBrush(RGB(color.x * 255, color.y * 255, color.z * 255));
-		FillRect(hdcMem, &rect, br);
-		DeleteObject(br);
-
-		rect.top += yhop;
-		rect.bottom += yhop;
-		color = cMap[OTindexR];
-		br = CreateSolidBrush(RGB(color.x * 255, color.y * 255, color.z * 255));
-		FillRect(hdcMem, &rect, br);
-		DeleteObject(br);
+		colorSwatch(OTindexX, rect);
+		colorSwatch(OTindexY, rect);
+		colorSwatch(OTindexZ, rect);
+		colorSwatch(OTindexR, rect);
 	}
 
 	BitBlt(hdc,
@@ -394,7 +398,7 @@ void Widget::jumpFocus() {
 		refresh();
 		break;
 	case kboolean:
-		data[index].alterValue(1,1);
+		data[index].alterValue(1, 1);
 		fractal.defineWidgetsForCurrentEquation(false);
 		fractal.isDirty = true;
 		break;
@@ -415,10 +419,10 @@ void Widget::jumpToPreviousFocus() {
 }
 
 bool Widget::isAltering() {
-	if (focus == INACTIVE || alterationDirection == 0) 
+	if (focus == INACTIVE || alterationDirection == 0)
 		return false;
 
-	if (data[focus].alterValue(alterationDirection, alterationSpeed)) 
+	if (data[focus].alterValue(alterationDirection, alterationSpeed))
 		refresh();
 
 	return true;
@@ -473,7 +477,7 @@ void Widget::mouseDown(LPARAM lp) {
 	pt.y = GET_Y_LPARAM(lp);
 	jumpFocus();
 
-	if (focus != INACTIVE && (data[focus].kind == kfloat || data[focus].kind == kinteger)) 
+	if (focus != INACTIVE && (data[focus].kind == kfloat || data[focus].kind == kinteger))
 		isMouseDown = true;
 }
 

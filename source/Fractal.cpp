@@ -5,6 +5,7 @@
 #include "SaveLoad.h"
 #include "WICTextureLoader.h"
 #include "ColorMap.h"
+#include "common.h"
 
 Fractal fractal;
 Widget pWidget;
@@ -13,7 +14,13 @@ Widget cWidget;
 extern HWND g_hWnd;
 
 void Fractal::init() {
+
+#ifdef DEVLOPEMENT_SINGLE_FRACTAL
+	EQUATION = 2;
+#else
 	EQUATION = EQU_04_KLEINIAN;
+#endif
+
 	DOINVERSION = 1;
 	ISSTEREO = 0;
 	PARALLAX = 0.003;
@@ -87,6 +94,7 @@ void Fractal::resetColors() {
 	COLORPARAM = 4000;
 	ENHANCE = 0;
 	COLORROLL = 0;
+	SECONDSURFACE = 0;
 	lightAngle = 1.5;
 	SPECULAR = 0.2;
 	OTcycles = 0;
@@ -99,6 +107,7 @@ void Fractal::resetColors() {
 	OTcolorYW = 1;
 	OTcolorZW = 1;
 	OTcolorRW = 1;
+	OTstyle = 0;
 	cWidget.refresh();
 }
 
@@ -983,6 +992,7 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 	cWidget.addEntry("Brightness", &BRIGHT, 0.01, 10, 0.02, kfloat);
 	cWidget.addEntry("Enhance", &ENHANCE, 0, 30, 0.03, kfloat);
 	cWidget.addEntry("ColorRoll", &COLORROLL, 0, 30, 0.03, kfloat);
+	cWidget.addEntry("Second Surface", &SECONDSURFACE, 0, 3, 0.00001, kfloat);
 
 	if (COLORSCHEME == 6 || COLORSCHEME == 7)
 		cWidget.addEntry("Color Boost", &COLORPARAM, 1, 1200000, 200, kfloat);
@@ -996,21 +1006,26 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 	cWidget.addEntry("#Cycles", &OTcycles, 0, 100, 0.2, kfloat);
 	cWidget.addLegend("");
 	cWidget.addEntry("X Color", &OTindexX, 0, 255, 5, kinteger);
-	cWidget.addEntry("Y Color", &OTindexY, 0, 255, 5, kinteger);
-	cWidget.addEntry("Z Color", &OTindexZ, 0, 255, 5, kinteger);
-	cWidget.addEntry("R Color", &OTindexR, 0, 255, 5, kinteger);
+	cWidget.addEntry("Y", &OTindexY, 0, 255, 5, kinteger);
+	cWidget.addEntry("Z", &OTindexZ, 0, 255, 5, kinteger);
+	cWidget.addEntry("R", &OTindexR, 0, 255, 5, kinteger);
 	cWidget.addLegend("");
 	cWidget.addEntry("X Weight", &OTcolorXW, -5, 5, 0.1, kfloat);
-	cWidget.addEntry("Y Weight", &OTcolorYW, -5, 5, 0.1, kfloat);
-	cWidget.addEntry("Z Weight", &OTcolorZW, -5, 5, 0.1, kfloat);
-	cWidget.addEntry("R Weight", &OTcolorRW, -5, 5, 0.1, kfloat);
+	cWidget.addEntry("Y", &OTcolorYW, -5, 5, 0.1, kfloat);
+	cWidget.addEntry("Z", &OTcolorZW, -5, 5, 0.1, kfloat);
+	cWidget.addEntry("R", &OTcolorRW, -5, 5, 0.1, kfloat);
+
+	cWidget.addLegend("");
+	cWidget.addEntry("FixedStyle", &OTstyle, 0, 2, 1, kinteger);
+	cWidget.addEntry("X Fixed", &OTfixedX, -4, 4, 0.002, kfloat);
+	cWidget.addEntry("Y", &OTfixedY, -4, 4, 0.002, kfloat);
+	cWidget.addEntry("Z", &OTfixedZ, -4, 4, 0.002, kfloat);
 
 	cWidget.addLegend("");
 	cWidget.addLegend("G: Select next coloring style");
 	cWidget.addLegend("C: Select next OrbitTrap palette");
 	cWidget.addLegend("P: Save image to BMP file");
 
-	cWidget.addLegend("");
 	cWidget.addBoolean("K: Add Texture", &TONOFF);
 	if (TONOFF) {
 		cWidget.addEntry("   Scale", &TSCALE, 0.1, 20, 0.1, kfloat);
@@ -1018,7 +1033,7 @@ void Fractal::defineWidgetsForCurrentEquation(bool resetFocus) {
 		cWidget.addEntry("   Center Y", &TCENTERY, 0, 1, 0.01, kfloat);
 	}
 	
-	if (!resetFocus) pWidget.jumpToPreviousFocus();
+	if (!resetFocus) pWidget.jumpToPreviousFocus(); else cycleFocus(true);
 	pWidget.refresh();
 	cWidget.refresh();
 }
@@ -1312,6 +1327,11 @@ void Fractal::keyDown(int key) {
 
 	switch (key) {
 	case VK_ESCAPE:
+		if (pWidget.isVisible) { // 1st <Esc> press closes child windows
+			keyDown(' ');
+			return;
+		}
+
 		SendMessage(g_hWnd, WM_CLOSE, 0, 0);
 		SendMessage(pWidget.hWnd, WM_CLOSE, 0, 0);
 		SendMessage(cWidget.hWnd, WM_CLOSE, 0, 0);
@@ -1343,8 +1363,7 @@ void Fractal::keyDown(int key) {
 			SetForegroundWindow(g_hWnd);
 		break;
 	case 'v' :
-		pWidget.toggleFocus();
-		cWidget.toggleFocus();
+		cycleFocus();
 		break;
 	case '1':
 		changeEquationIndex(-1);
@@ -1474,6 +1493,29 @@ void Fractal::keyUp(int key) {
 		rotateMode = false;
 		break;
 	}
+}
+
+// ==========================================================
+
+static int currentFocus = 0;  // 0,1 = p,c
+
+void Fractal::cycleFocus(bool setToPwidget) {
+	if (setToPwidget) currentFocus = 0;
+	if (++currentFocus > 1) currentFocus = 0;
+
+	switch (currentFocus) {
+	case 0:
+		pWidget.gainFocus();
+		cWidget.loseFocus();
+		break;
+	case 1:
+		pWidget.loseFocus();
+		cWidget.gainFocus();
+		break;
+	}
+
+	pWidget.updateWindowFocus();
+	cWidget.updateWindowFocus();
 }
 
 // ==========================================================

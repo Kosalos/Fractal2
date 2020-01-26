@@ -118,12 +118,11 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 	}
 	ShowWindow(g_hWnd, nCmdShow);
 
-	cWidget.create(CWIDGETS,"cWidget", "Colors",g_hWnd, hInstance,460);
-	pWidget.create(PWIDGETS,"pWidget", "Parameters", g_hWnd, hInstance,380);
+	cWidget.create(CWIDGETS, "cWidget", "Colors", g_hWnd, hInstance, 530);
+	pWidget.create(PWIDGETS, "pWidget", "Parameters", g_hWnd, hInstance, 380);
 
-	cWidget.loseFocus();
-	pWidget.gainFocus();
-
+	fractal.cycleFocus(true);
+	
 	help.create(g_hWnd, hInstance);
 	saveLoad.create(g_hWnd, hInstance);
 	return S_OK;
@@ -181,10 +180,10 @@ HRESULT InitializeD3D11(HWND hWnd) {
 		if (SUCCEEDED(hr)) break;
 	}
 	ABORT(hr);
-	
+
 	// Create Render Target View Object from SwapChain's Back Buffer.
 	// Access one of swap chain's back buffer.[0-based buffer index, interface type which manipulates buffer, output param]
-	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)& pBackBuffer);
+	hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 	ABORT(hr);
 
 	hr = pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);

@@ -25,6 +25,7 @@ LRESULT CALLBACK SaveLoadWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 			break;
 		case 2: // Close button
 			ShowWindow(hWnd, SW_HIDE);
+			fractal.refresh(true);
 			break;
 		}
 		break;
@@ -44,7 +45,7 @@ LRESULT CALLBACK SaveLoadWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		RECT rc;
 		HDC hdc = (HDC)wParam;
 		GetClientRect(hWnd, &rc);
-		FillRect(hdc, &rc, CreateSolidBrush(RGB(210, 235, 210)));
+		FillRect(hdc, &rc, CreateSolidBrush(RGB(210, 210, 210)));
 		return 1L;
 	}
 	break;

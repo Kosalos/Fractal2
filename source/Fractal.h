@@ -31,13 +31,14 @@ public:
 	void mouseMove(WPARAM wParam, LPARAM lParam);
 	void mouseTimerHandler();
 	void resetColors();
+	void cycleFocus(bool setToPwidget = false);
 
 	void refresh(bool resetFocus);
 	bool isDirty;
 	float alterationSpeed;
 	bool isShiftKeyPressed;
 	bool isControlKeyPressed;
-
+	
 private:
 	XMFLOAT4 jogAmount;
 	float lightAngle;

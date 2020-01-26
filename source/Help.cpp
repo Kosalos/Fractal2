@@ -15,6 +15,7 @@ LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 		help.hWndList = CreateWindowEx(WS_EX_CLIENTEDGE, "Listbox", "", WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | LBS_NOSEL, 5, 5, 480,560, hWnd, (HMENU)101, NULL, NULL);
 		CreateWindowEx(NULL, TEXT("button"), TEXT("Close"), WS_VISIBLE | WS_CHILD, 10, 565, 60, 20, hWnd, (HMENU)106, NULL, NULL);
 		SendMessage(help.hWndList, WM_SETFONT, WPARAM(help.font), 0);
+		SendMessage(help.hWnd, WM_SETFOCUS,0,0);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))	{
@@ -24,15 +25,19 @@ LRESULT CALLBACK HelpWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 		}
 		break;
 	case WM_ERASEBKGND:
-	{
+		{
 		RECT rc;
 		HDC hdc = (HDC)wParam;
 		GetClientRect(hWnd, &rc);
-		FillRect(hdc, &rc, CreateSolidBrush(RGB(200, 235, 200)));
+		FillRect(hdc, &rc, CreateSolidBrush(RGB(200, 200, 200)));
 		return 1L;
-	}
-	break;
+		}
+		break;
 
+	case WM_KEYDOWN :
+		if(wParam == 27) 
+			ShowWindow(hWnd, SW_HIDE);
+		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -80,6 +85,7 @@ void Help::launch(int id) {
 	addHelptext();
 
 	ShowWindow(hWnd, SW_SHOWNORMAL);
+	SetFocus(hWnd);
 }
 
 // -------------------------------------------------------------------
@@ -132,16 +138,23 @@ static const char* cHelptext[] = {
 "and by tracking certain variables as the escape is determined",
 "we learn information that can be used to",
 "enhance the fractal coloring.",
-" ",
-"New widgets have been added :",
+"During a ray-marching Distance Estimation session,",
+"we track the calculated position as the algorithm iterates.",
+"The distance of the position from a specifed anchor point",
+"is used to calculate a coloring effect.",
 " ",
 "Strength : relative brightness of trap coloring, from 0 % to 100 %",
 "Cycles:    how many times the trap controls are repeated",
 " ",
-"X Color :  assign Color to channel 'x' (252 colors)",
-"X Weight : specify how much channel X adds to color, from -3 to +3",
+"X Color :  assign Color to channel 'X' (252 colors)",
+"X Weight : relative strength of this channel to coloring algorithm",
 " ",
 "... the same 2 widgets for channels Y ... R",
+" ",
+"Fixed Style:  how Orbit distance is calculated",
+"0 : Orbit Distance is from origin.",
+"1 : Orbit Distance is from specified position.",
+"2 : Orbit Distance is san offset from starting position.",
 " ",
 "Keyboard commands:",
 " ",

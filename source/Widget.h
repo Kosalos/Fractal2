@@ -75,8 +75,11 @@ public:
 	void destroy();
 
 	void loseFocus() {
-		if(focus != INACTIVE) previousFocus = focus;
-		focus = INACTIVE;
+		if (focus != INACTIVE) {
+			previousFocus = focus;
+			focus = INACTIVE;
+		}
+
 		refresh();
 	}
 
@@ -86,7 +89,7 @@ public:
 		refresh();
 	}
 
-	void toggleFocus() {
+	void updateWindowFocus() {
 		PostMessage(hWnd, (focus == INACTIVE) ? WM_SETFOCUS : WM_KILLFOCUS, 0, 0);
 	}
 
@@ -115,4 +118,5 @@ public:
 	void mouseDown(LPARAM pt);
 	void mouseMove(LPARAM pt);
 	void mouseUp();
+	void colorSwatch(int colorIndex, RECT& r);
 };

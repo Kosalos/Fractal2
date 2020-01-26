@@ -1,4 +1,8 @@
 // Control structure definition for HLSL
+
+// fxc compiler is very slow. Define this to have only one fractal equation.
+//#define DEVLOPEMENT_SINGLE_FRACTAL 
+
 #ifdef SHADER
 #define FLOAT4 float4
 #define INTEGER4 int4
@@ -48,6 +52,7 @@
 
 #define ENHANCE			P7.x
 #define COLORROLL		P7.y
+#define SECONDSURFACE   P7.z
 
 #define INVERSION_X			inv1.x
 #define INVERSION_Y			inv1.y
@@ -83,6 +88,10 @@
 #define OTindexY			OTindex.y
 #define OTindexZ			OTindex.z
 #define OTindexR			OTindex.w
+#define OTstyle				I4.z
+#define OTfixedX			OTfixed.x
+#define OTfixedY			OTfixed.y
+#define OTfixedZ			OTfixed.z
 
 cbuffer Control : register(b0)
 
@@ -150,6 +159,7 @@ void SafeRelease(T** ppT) { if (*ppT) { (*ppT)->Release(); *ppT = NULL; } }
 
 #define ENHANCE			control.P7.x
 #define COLORROLL		control.P7.y
+#define SECONDSURFACE   control.P7.z
 
 #define INVERSION_X			control.inv1.x
 #define INVERSION_Y			control.inv1.y
@@ -185,6 +195,10 @@ void SafeRelease(T** ppT) { if (*ppT) { (*ppT)->Release(); *ppT = NULL; } }
 #define OTindexY			control.OTindex.y
 #define OTindexZ			control.OTindex.z
 #define OTindexR			control.OTindex.w
+#define OTstyle				control.I4.z
+#define OTfixedX			control.OTfixed.x
+#define OTfixedY			control.OTfixed.y
+#define OTfixedZ			control.OTfixed.z
 
 struct Control
 
@@ -208,6 +222,7 @@ struct Control
 	FLOAT4 OTs; // cycles, sterength, unused,unused
 	FLOAT4 OTx, OTy, OTz, OTr; // color RGB, weight
 	INTEGER4 OTindex; // color index
+	FLOAT4 OTfixed;
 };
 
 #define EQU_01_MANDELBULB 1

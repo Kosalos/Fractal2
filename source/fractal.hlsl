@@ -71,6 +71,8 @@ DEResult resultInit() {
 	return ans;
 }
 
+#ifndef DEVLOPEMENT_SINGLE_FRACTAL
+
 // 1------------------------------------------------------------
 //Q1 power
 
@@ -78,6 +80,8 @@ DEResult DE_MANDELBULB(float3 pos) {
 	DEResult result = resultInit();
 	float dr = 1;
 	float r, theta, phi, pwr, ss;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		r = length(pos);
@@ -94,7 +98,9 @@ DEResult DE_MANDELBULB(float3 pos) {
 
 		dr = (pow(r, Q1 - 1.0) * Q1 * dr) + 1.0;
 
-		float4 hk = float4(pos, r);
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r);
 		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
@@ -112,6 +118,8 @@ DEResult DE_APOLLONIAN(float3 pos) {
 	DEResult result = resultInit();
 	float k, t = Q3 + 0.25 * cos(Q4 * PI * Q1 * (pos.z - pos.x));
 	float scale = 1;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = -1.0 + 2.0 * frac(0.5 * pos + 0.5);
@@ -119,7 +127,10 @@ DEResult DE_APOLLONIAN(float3 pos) {
 		pos *= k;
 		scale *= k;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, k);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = 1.5 * (0.25 * abs(pos.y) / scale);
@@ -136,6 +147,8 @@ DEResult DE_APOLLONIAN2(float3 pos) {
 	DEResult result = resultInit();
 	float t = Q3 + 0.25 * cos(Q4 * PI * Q1 * (pos.z - pos.x));
 	float scale = 1;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = -1.0 + 2.0 * frac(0.5 * pos + 0.5);
@@ -145,7 +158,10 @@ DEResult DE_APOLLONIAN2(float3 pos) {
 		pos *= k;
 		scale *= k;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, k);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	float d1 = sqrt(min(min(dot(pos.xy, pos.xy), dot(pos.yz, pos.yz)), dot(pos.zx, pos.zx))) - 0.02;
@@ -181,6 +197,7 @@ DEResult JosKleinian(float3 z) {
 	float DF = 1.0;
 	float a = Q3, b = Q4;
 	float f = sign(b);
+	float4 ot, trap = OTfixed;
 
 	for (int i = 0; i < BOXITERATIONS; ++i) {
 		z.x = z.x + b / a * z.y;
@@ -209,7 +226,10 @@ DEResult JosKleinian(float3 z) {
 		//Store previous iterates
 		llz = lz; lz = z;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(z), dot(z, z)));
+		ot.xyz = z;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, length(llz));
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	//WIP: Push the iterated point left or right depending on the sign of KleinI
@@ -234,21 +254,21 @@ DEResult JosKleinian(float3 z) {
 DEResult DE_KLEINIAN(float3 pos) {
 	DEResult result = resultInit();
 
-	//if (DOINVERSION != 0) {
-	//	pos = pos - inv1.xyz;
-	//	float r = length(pos);
-	//	float r2 = r * r;
-	//	pos = (INVERSION_RADIUS * INVERSION_RADIUS / r2) * pos + inv1.xyz;
+	if (DOINVERSION != 0) {
+		pos = pos - inv1.xyz;
+		float r = length(pos);
+		float r2 = r * r;
+		pos = (INVERSION_RADIUS * INVERSION_RADIUS / r2) * pos + inv1.xyz;
 
-	//	float an = atan2(pos.y, pos.x) + INVERSION_ANGLE;
-	//	float ra = sqrt(pos.y * pos.y + pos.x * pos.x);
-	//	pos.x = cos(an) * ra;
-	//	pos.y = sin(an) * ra;
-	//	float de = JosKleinian(pos);
-	//	de = r2 * de / (INVERSION_RADIUS * INVERSION_RADIUS + r * de);
-	//	result = de;
-	//}
-	//else
+		float an = atan2(pos.y, pos.x) + INVERSION_ANGLE;
+		float ra = sqrt(pos.y * pos.y + pos.x * pos.x);
+		pos.x = cos(an) * ra;
+		pos.y = sin(an) * ra;
+		float de = JosKleinian(pos).dist;
+		de = r2 * de / (INVERSION_RADIUS * INVERSION_RADIUS + r * de);
+		result.dist = de;
+	}
+	else
 	result = JosKleinian(pos);
 
 	return result;
@@ -274,6 +294,8 @@ DEResult DE_MANDELBOX(float3 pos) {
 
 	float fR2 = Q3 * Q3;
 	float mR2 = Q4 * Q4;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		if (DOINVERSION != 0) {
@@ -303,6 +325,10 @@ DEResult DE_MANDELBOX(float3 pos) {
 		pos = pos * Q1 + c;
 		dr *= Q1;
 
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, dr);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
 	}
 
@@ -323,6 +349,8 @@ DEResult DE_QUATJULIA(float3 pos) {
 	float md2 = 1.0;
 	float4 z = float4(pos, 0);
 	float mz2 = dot(z, z);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		md2 *= 4.0 * mz2;
@@ -333,7 +361,10 @@ DEResult DE_QUATJULIA(float3 pos) {
 		mz2 = dot(z, z);
 		if (mz2 > 12.0) break;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(z.xyz), mz2));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, mz2);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = 0.3 * sqrt(mz2 / md2) * log(mz2);
@@ -394,6 +425,8 @@ DEResult DE_POLY_MENGER(float3 pos) {
 	pos = DodecSym(pos);
 	pos.z += 0.6 * (1. + b.z);
 	pos.xy /= 1. - Q3 * pos.z;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (float n = 0.; n < nIt; n++) {
 		pos = abs(pos);
@@ -403,7 +436,10 @@ DEResult DE_POLY_MENGER(float3 pos) {
 		pos = sclFac * pos - b;
 		pos.z += b.z * step(pos.z, -0.5 * b.z);
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, length(pos));
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = 0.8 * PrBoxDf(pos, float3(1, 1, 1)) / pow(abs(sclFac), nIt);
@@ -425,12 +461,16 @@ DEResult DE_GOLD(float3 pos) {
 	float4 q = float4(pos, 1);
 	float3 offset1 = float3(Q1, Q2, Q3);
 	float4 offset2 = float4(Q4, Q5, Q6, Q7);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int n = 0; n < MAXSTEPS; ++n) {
 		q.xyz = abs(q.xyz) - offset1;
 		q = 2.0 * q / clamp(dot(q.xyz, q.xyz), 0.4, 1.0) - offset2;
-		
-		result.orbitTrap = min(result.orbitTrap, abs(q));
+
+		ot = q;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = length(q.xyz) / q.w;
@@ -477,6 +517,8 @@ DEResult DE_SPIDER(float3 pos) {
 	float q = sin(pos.z * Q1) * Q2 * 10 + 0.6;
 	float t = length(pos.xy);
 	float s = 1.0;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < 2; ++i) {
 		float m = dot(pos, pos);
@@ -484,11 +526,14 @@ DEResult DE_SPIDER(float3 pos) {
 		pos = rotatePosition(pos, 0, q);
 		s *= m;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, s);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	float d = (length(pos.xz) - Q3) * s;
-	
+
 	result.dist = smax(d, -t, 0.3);
 	return result;
 }
@@ -501,6 +546,8 @@ DEResult DE_SPIDER(float3 pos) {
 DEResult DE_KLEINIAN2(float3 pos) {
 	DEResult result = resultInit();
 	float k, scale = 1;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < 7; ++i) {
 		pos = 2 * clamp(pos, P3.xyz, P4.xyz) - pos;
@@ -508,11 +555,14 @@ DEResult DE_KLEINIAN2(float3 pos) {
 		pos *= k;
 		scale *= k;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, k);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	float rxy = length(pos.xy);
-	result.dist =  0.7 * max(rxy - P4.w, rxy * pos.z / length(pos)) / scale;
+	result.dist = 0.7 * max(rxy - P4.w, rxy * pos.z / length(pos)) / scale;
 	return result;
 }
 
@@ -523,9 +573,11 @@ DEResult DE_KLEINIAN2(float3 pos) {
 // Q4 Angle2
 // P3 = n1
 
-	DEResult DE_SIERPINSKI_T(float3 pos) {
-		DEResult result = resultInit();
+DEResult DE_SIERPINSKI_T(float3 pos) {
+	DEResult result = resultInit();
 	int i;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q3);
@@ -538,7 +590,10 @@ DEResult DE_KLEINIAN2(float3 pos) {
 		pos = pos * Q1 - P3.xyz * (Q1 - 1.0);
 		if (length(pos) > 4) break;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, length(pos));
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = (length(pos) - 2) * pow(abs(Q1), -float(i));
@@ -555,6 +610,8 @@ DEResult DE_KLEINIAN2(float3 pos) {
 DEResult DE_HALF_TETRA(float3 pos) {
 	DEResult result = resultInit();
 	int i;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q3);
@@ -567,7 +624,10 @@ DEResult DE_HALF_TETRA(float3 pos) {
 		pos = pos * Q1 - P3.xyz * (Q1 - 1.0);
 		if (length(pos) > 4) break;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, length(pos));
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = (length(pos) - 2) * pow(abs(Q1), -float(i));
@@ -585,6 +645,8 @@ DEResult DE_HALF_TETRA(float3 pos) {
 DEResult DE_KALEIDO(float3 pos) {
 	DEResult result = resultInit();
 	int i;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q4);
@@ -602,7 +664,10 @@ DEResult DE_KALEIDO(float3 pos) {
 		pos = pos * Q1 - P3.xyz * (Q1 - 1.0);
 		if (length(pos) > 4) break;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, length(pos));
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = (length(pos) - 2) * pow(abs(Q1), -float(i));
@@ -693,7 +758,13 @@ DEResult DE_POLYCHORA(float3 pos) {
 	z4 = Rotate(z4);  //z4.xyw=rot*z4.xyw;
 	z4 = fold(z4);  //fold it
 
-	result.orbitTrap = min(result.orbitTrap, abs(z4));
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
+
+	ot = z4;
+	if (OTstyle > 0) ot -= trap;
+	float4 hk = float4(ot.xyz, length(ot.xyz));
+	result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 
 	result.dist = min(dist2Vertex(z4, r), dist2Segments(z4, r));
 	return result;
@@ -715,6 +786,8 @@ DEResult DE_KALIBOX(float3 pos) {
 	DEResult result = resultInit();
 	float4 p = float4(pos, 1);
 	float4 p0 = float4(julia.xyz, 1);  // p.w is the distance estimate
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 
@@ -727,7 +800,9 @@ DEResult DE_KALIBOX(float3 pos) {
 		p *= clamp(max(Q2 / r2, Q2), 0.0, 1.0);  // dp3,div,max.sat,mul
 		p = p * P5 + (JULIAMODE != 0 ? p0 : float4(0, 0, 0, 0));
 
-		result.orbitTrap = min(result.orbitTrap, abs(p));
+		ot = p;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = ((length(p.xyz) - QC) / p.w - QD);
@@ -741,6 +816,8 @@ DEResult DE_FLOWER(float3 pos) {
 	DEResult result = resultInit();
 	float4 q = float4(pos, 1);
 	float4 juliaOffset = float4(julia.xyz, 0);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) { //kaliset fractal with no mirroring offset
 		q.xyz = abs(q.xyz);
@@ -749,7 +826,10 @@ DEResult DE_FLOWER(float3 pos) {
 
 		q = 2.0 * q - juliaOffset;
 
-		result.orbitTrap = min(result.orbitTrap, abs(q));
+		ot = q;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, length(ot.xyz));
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = (length(q.xy) / q.w - 0.003); // cylinder primative instead of a sphere primative.
@@ -763,6 +843,8 @@ DEResult DE_ALEK_BULB(float3 pos) {
 	DEResult result = resultInit();
 	float dr = 1;
 	float r, mcangle, theta, pwr;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		r = length(pos);
@@ -783,7 +865,10 @@ DEResult DE_ALEK_BULB(float3 pos) {
 
 		dr = (pow(r, Q1 - 1.0) * Q1 * dr) + 1.0;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, theta);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = 0.5 * log(r) * r / dr;
@@ -814,6 +899,8 @@ DEResult DE_SURFBOX(float3 pos) {
 	float fR2 = Q3 * Q3;
 	float mR2 = Q4 * Q4;
 	float foldMod = Q1 * Q2;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos.x = surfBoxFold(pos.x, Q1, foldMod);
@@ -835,8 +922,11 @@ DEResult DE_SURFBOX(float3 pos) {
 
 		pos = pos * Q6 + c;
 		dr *= Q6;
-		
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, dr);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = length(pos) / abs(dr);
@@ -881,6 +971,9 @@ DEResult DE_SPONGE(float3 pos) {
 	DEResult result = resultInit();
 	float k, r2;
 	float scale = 1.0;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
+
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = 2.0 * clamp(pos, P3.xyz, P4.xyz) - pos;
 		r2 = dot(pos, pos);
@@ -888,7 +981,10 @@ DEResult DE_SPONGE(float3 pos) {
 		pos *= k;
 		scale *= k;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), r2));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, k);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	pos /= scale;
@@ -899,8 +995,11 @@ DEResult DE_SPONGE(float3 pos) {
 
 // 20-----------------------------------------------------------
 DEResult DE_FULL_TETRA(float3 pos) {
-	DEResult result = resultInit(); 
+	DEResult result = resultInit();
 	int i;
+	float len;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (i = 0; i < MAXSTEPS; ++i) {
 		pos = rotatePosition(pos, 0, Q3);
@@ -914,9 +1013,13 @@ DEResult DE_FULL_TETRA(float3 pos) {
 
 		pos = rotatePosition(pos, 2, Q4);
 		pos = pos * Q1 - P4.xyz * (Q1 - 1.0);
-		if (length(pos) > 4) break;
+		len = length(pos);
+		if (len > 4) break;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, len);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = (length(pos) - 2) * pow(Q1, -float(i));
@@ -934,12 +1037,14 @@ float2 complexMul(float2 a, float2 b) { return float2(a.x * b.x - a.y * b.y, a.x
 DEResult DE_QUATJULIA2(float3 pos) {
 	DEResult result = resultInit();
 	float4 p4 = stereographic3Sphere(pos);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	p4.xyz += julia.xyz;    // "offset"
 
 	float2 p = p4.xy;
 	float2 c = p4.zw;
-	float d,dp = 1.0;
+	float d, dp = 1.0;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		dp = 2.0 * length(p) * dp + 1.0;
@@ -948,7 +1053,10 @@ DEResult DE_QUATJULIA2(float3 pos) {
 		d = dot(p, p);
 		if (d > 10) break;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(p),length(p),d));
+		ot = float4(p, c);
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, d);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	float r = length(p);
@@ -959,9 +1067,11 @@ DEResult DE_QUATJULIA2(float3 pos) {
 // 29 ---------------------------------------------------------
 
 DEResult DE_MBROT(float3 pos) {
-	DEResult result = resultInit(); 
+	DEResult result = resultInit();
 	float4 p = float4(pos, Q1);
 	float4 dp = float4(1.0, 0.0, 0.0, 0.0);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	p.yzw = rotatePosition(p.yzw, 0, julia.x);
 	p.yzw = rotatePosition(p.yzw, 1, julia.y);
@@ -974,7 +1084,9 @@ DEResult DE_MBROT(float3 pos) {
 		float p2 = dot(p, p);
 		if (p2 > 10) break;
 
-		result.orbitTrap = min(result.orbitTrap, abs(p));
+		ot = p;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	float r = length(p);
@@ -996,6 +1108,8 @@ DEResult DE_SPUDS(float3 pos) {
 	int n = 0;
 	float dz = 1.0;
 	float r2, r = length(pos);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	while (r < 10 && n < MAXSTEPS) {
 		if (n < 6) {
@@ -1034,7 +1148,10 @@ DEResult DE_SPUDS(float3 pos) {
 		}
 
 		r = length(pos);
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 
 		n++;
 	}
@@ -1050,6 +1167,8 @@ DEResult DE_SPIRALBOX(float3 pos) {
 	float3 z = pos;
 	float r, DF = 1.0;
 	float3 offset = (JULIAMODE != 0 ? julia.xyz / 10 : pos);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		z.xyz = boxFold(z.xyz, Q1);
@@ -1062,7 +1181,10 @@ DEResult DE_SPIRALBOX(float3 pos) {
 		z.xz *= -1.;
 		z += offset;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(z), dot(z, z)));
+		ot.xyz = z;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	r = length(z);
@@ -1076,6 +1198,8 @@ DEResult DE_TWISTBOX(float3 pos) {
 	DEResult result = resultInit();
 	float3 c = JULIAMODE != 0 ? julia.xyz : pos;
 	float r, DF = Q2;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		pos = boxFold(pos, Q1);
@@ -1086,8 +1210,11 @@ DEResult DE_TWISTBOX(float3 pos) {
 		DF /= r;
 		pos.xz *= -1;
 		pos += c;
-		
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), r));
+
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	r = length(pos);
@@ -1106,6 +1233,8 @@ DEResult DE_KALI_RONTGEN(float3 pos) {
 	float d = 10000.;
 	float4 p = float4(pos, 1.);
 	float3 param = float3(Q1, Q2, Q3);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		p = abs(p) / dot(p.xyz, p.xyz);
@@ -1119,7 +1248,9 @@ DEResult DE_KALI_RONTGEN(float3 pos) {
 		p.xyz -= param;
 		p.xyz = rotatePosition(p.xyz, 1, Q4);
 
-		result.orbitTrap = min(result.orbitTrap, abs(p));
+		ot = p;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = d;
@@ -1146,6 +1277,8 @@ DEResult DE_VERTEBRAE(float3 pos) {
 	float md2 = 1.0;
 	float4 z = float4(pos, 0);
 	float mz2 = dot(z, z);
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		md2 *= 4.0 * mz2;
@@ -1163,7 +1296,9 @@ DEResult DE_VERTEBRAE(float3 pos) {
 		mz2 = dot(z, z);
 		if (mz2 > 12.0) break;
 
-		result.orbitTrap = min(result.orbitTrap, abs(z));
+		ot = z;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = 0.3 * sqrt(mz2 / md2) * log(mz2);
@@ -1178,6 +1313,8 @@ DEResult DE_DARKSURF(float3 pos) {
 	float AbsScaleRaisedTo1mIters = pow(absScalem1, float(1 - MAXSTEPS));
 
 	float4 p = float4(pos, 1), p0 = p;  // p.w is the distance estimate
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		p.xyz = rotatePosition(p.xyz, 0, Q4);
@@ -1211,7 +1348,9 @@ DEResult DE_DARKSURF(float3 pos) {
 		p = p * Q1 + p0;
 		if (r2 > 1000.0) break;
 
-		result.orbitTrap = min(result.orbitTrap, abs(p));
+		ot = p;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = ((length(p.xyz) - absScalem1) / p.w - AbsScaleRaisedTo1mIters);
@@ -1251,6 +1390,8 @@ DEResult DE1(float3 pos) {
 	float r = length(z);
 	float dr = 1.0;
 	int i = 0;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	while (r < Bailout && (i < MAXSTEPS)) {
 		dr = dr * 2 * r;
@@ -1261,7 +1402,10 @@ DEResult DE1(float3 pos) {
 		z = rotatePosition(z, 1, Q2);
 		z = rotatePosition(z, 2, Q2);
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(z), dot(z, z)));
+		ot.xyz = z;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 
 		++i;
 	}
@@ -1271,7 +1415,7 @@ DEResult DE1(float3 pos) {
 }
 
 DEResult DE_BUFFALO(float3 pos) {
-	DEResult t1,t2,result = resultInit();
+	DEResult t1, t2, result = resultInit();
 	float3 z = pos;
 	float dist = 0;
 
@@ -1313,6 +1457,8 @@ DEResult DE_BUFFALO(float3 pos) {
 		float r = length(z);
 		float dr = 1.0;
 		int i = 0;
+		float4 ot, trap = OTfixed;
+		if (OTstyle == 2) trap.xyz -= pos;
 
 		while (r < Bailout && (i < MAXSTEPS)) {
 			dr = dr * 2 * r;
@@ -1323,7 +1469,10 @@ DEResult DE_BUFFALO(float3 pos) {
 			z = rotatePosition(z, 1, Q2);
 			z = rotatePosition(z, 2, Q2);
 
-			result.orbitTrap = min(result.orbitTrap, float4(abs(z), dot(z, z)));
+			ot.xyz = z;
+			if (OTstyle > 0) ot -= trap;
+			float4 hk = float4(ot.xyz, r);
+			result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 
 			++i;
 		}
@@ -1341,6 +1490,8 @@ DEResult DE_TEMPLE(float3 pos) {
 	float3 p = pos;
 	p.xz = abs(.5 - fmod(pos.xz, 1.)) + .01;
 	float DEfactor = 1.;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; i++) {
 		p = abs(p) - float3(0., Q2, 0.);
@@ -1353,7 +1504,10 @@ DEResult DE_TEMPLE(float3 pos) {
 		p = rotatePosition(p, 0, Q7);
 		p = rotatePosition(p, 1, Q8);
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(p), dot(p, p)));
+		ot.xyz = p;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r2);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	float rr = length(pos + float3(0., -3.03, 1.85 - Q2)) - .017;
@@ -1371,6 +1525,8 @@ DEResult DE_TEMPLE(float3 pos) {
 DEResult DE_KALI3(float3 pos) {
 	DEResult result = resultInit();
 	float r2, dr = 1.0;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		r2 = dot(pos, pos);
@@ -1379,7 +1535,10 @@ DEResult DE_KALI3(float3 pos) {
 		pos = abs(pos) / r2 * Q1 - julia.xyz;
 		dr = dr / r2 * Q1;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), r2));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, r2);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
 	}
 
 	result.dist = .15 * (length(pos.xz)) * length(pos.xy) / dr;
@@ -1394,6 +1553,8 @@ DEResult DE_DONUTS(float3 pos) {
 	float dis = 1e20;
 	float newdis, s = 1.;
 	float2 q;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
 
 	for (int i = 0; i < MAXSTEPS; ++i) {
 		q = float2(length(pos.xz) - Q1, pos.y);
@@ -1416,7 +1577,9 @@ DEResult DE_DONUTS(float3 pos) {
 		pos *= Q3;
 		s /= Q3;
 
-		result.orbitTrap = min(result.orbitTrap, float4(abs(pos), dot(pos, pos)));
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		result.orbitTrap = min(result.orbitTrap, dot(ot,ot));
 	}
 
 	result.dist = dis;
@@ -1428,42 +1591,69 @@ DEResult DE_Inner(float3 pos) {
 	DEResult result = resultInit();
 
 	switch (EQUATION) {
-		case EQU_01_MANDELBULB:		result = DE_MANDELBULB(pos); break;
-		case EQU_02_APOLLONIAN:		result = DE_APOLLONIAN(pos); break;
-		case EQU_03_APOLLONIAN2:	result = DE_APOLLONIAN2(pos); break;
-		case EQU_04_KLEINIAN:		result = DE_KLEINIAN(pos); break;
-		case EQU_05_MANDELBOX:		result = DE_MANDELBOX(pos); break;
-		case EQU_06_QUATJULIA:		result = DE_QUATJULIA(pos); break;
-		case EQU_09_POLY_MENGER:	result = DE_POLY_MENGER(pos); break;
-		case EQU_10_GOLD:			result = DE_GOLD(pos); break;
-		case EQU_11_SPIDER:			result = DE_SPIDER(pos); break;
-		case EQU_12_KLEINIAN2:		result = DE_KLEINIAN2(pos); break;
-		case EQU_18_SIERPINSKI:		result = DE_SIERPINSKI_T(pos); break;
-		case EQU_19_HALF_TETRA:		result = DE_HALF_TETRA(pos); break;
-		case EQU_24_KALEIDO:		result = DE_KALEIDO(pos); break;
-		case EQU_25_POLYCHORA:		result = DE_POLYCHORA(pos); break;
-		case EQU_30_KALIBOX:		result = DE_KALIBOX(pos); break;
-		case EQU_34_FLOWER:			result = DE_FLOWER(pos); break;
-		case EQU_38_ALEK_BULB:		result = DE_ALEK_BULB(pos); break;
-		case EQU_39_SURFBOX:		result = DE_SURFBOX(pos); break;
-		case EQU_40_TWISTBOX:		result = DE_TWISTBOX(pos); break;
-		case EQU_41_KALI_RONTGEN:	result = DE_KALI_RONTGEN(pos); break;
-		case EQU_42_VERTEBRAE:		result = DE_VERTEBRAE(pos); break;
-		case EQU_44_BUFFALO:		result = DE_BUFFALO(pos); break;
-		case EQU_47_SPONGE:			result = DE_SPONGE(pos);  break;
-		case EQU_20_FULL_TETRA:		result = DE_FULL_TETRA(pos);  break;
-		case EQU_28_QUATJULIA2:		result = DE_QUATJULIA2(pos); break;
-		case EQU_29_MBROT:			result = DE_MBROT(pos); break;
-		case EQU_31_SPUDS:			result = DE_SPUDS(pos); break;
-		case EQU_37_SPIRALBOX:		result = DE_SPIRALBOX(pos); break;
-		case EQU_43_DARKSURF:		result = DE_DARKSURF(pos); break;
-		case EQU_45_TEMPLE:			result = DE_TEMPLE(pos); break;
-		case EQU_46_KALI3:			result = DE_KALI3(pos); break;
-		case EQU_50_DONUTS:			result = DE_DONUTS(pos); break;
+	case EQU_01_MANDELBULB:		result = DE_MANDELBULB(pos); break;
+	case EQU_02_APOLLONIAN:		result = DE_APOLLONIAN(pos); break;
+	case EQU_03_APOLLONIAN2:	result = DE_APOLLONIAN2(pos); break;
+	case EQU_04_KLEINIAN:		result = DE_KLEINIAN(pos); break;
+	case EQU_05_MANDELBOX:		result = DE_MANDELBOX(pos); break;
+	case EQU_06_QUATJULIA:		result = DE_QUATJULIA(pos); break;
+	case EQU_09_POLY_MENGER:	result = DE_POLY_MENGER(pos); break;
+	case EQU_10_GOLD:			result = DE_GOLD(pos); break;
+	case EQU_11_SPIDER:			result = DE_SPIDER(pos); break;
+	case EQU_12_KLEINIAN2:		result = DE_KLEINIAN2(pos); break;
+	case EQU_18_SIERPINSKI:		result = DE_SIERPINSKI_T(pos); break;
+	case EQU_19_HALF_TETRA:		result = DE_HALF_TETRA(pos); break;
+	case EQU_24_KALEIDO:		result = DE_KALEIDO(pos); break;
+	case EQU_25_POLYCHORA:		result = DE_POLYCHORA(pos); break;
+	case EQU_30_KALIBOX:		result = DE_KALIBOX(pos); break;
+	case EQU_34_FLOWER:			result = DE_FLOWER(pos); break;
+	case EQU_38_ALEK_BULB:		result = DE_ALEK_BULB(pos); break;
+	case EQU_39_SURFBOX:		result = DE_SURFBOX(pos); break;
+	case EQU_40_TWISTBOX:		result = DE_TWISTBOX(pos); break;
+	case EQU_41_KALI_RONTGEN:	result = DE_KALI_RONTGEN(pos); break;
+	case EQU_42_VERTEBRAE:		result = DE_VERTEBRAE(pos); break;
+	case EQU_44_BUFFALO:		result = DE_BUFFALO(pos); break;
+	case EQU_47_SPONGE:			result = DE_SPONGE(pos);  break;
+	case EQU_20_FULL_TETRA:		result = DE_FULL_TETRA(pos);  break;
+	case EQU_28_QUATJULIA2:		result = DE_QUATJULIA2(pos); break;
+	case EQU_29_MBROT:			result = DE_MBROT(pos); break;
+	case EQU_31_SPUDS:			result = DE_SPUDS(pos); break;
+	case EQU_37_SPIRALBOX:		result = DE_SPIRALBOX(pos); break;
+	case EQU_43_DARKSURF:		result = DE_DARKSURF(pos); break;
+	case EQU_45_TEMPLE:			result = DE_TEMPLE(pos); break;
+	case EQU_46_KALI3:			result = DE_KALI3(pos); break;
+	case EQU_50_DONUTS:			result = DE_DONUTS(pos); break;
 	}
 
 	return result;
 }
+
+#else  // DEVLOPEMENT_SINGLE_FRACTAL
+
+DEResult DE_Inner(float3 pos) {
+	DEResult result = resultInit();
+	float k, t = Q3 + 0.25 * cos(Q4 * PI * Q1 * (pos.z - pos.x));
+	float scale = 1;
+	float4 ot, trap = OTfixed;
+	if (OTstyle == 2) trap.xyz -= pos;
+
+	for (int i = 0; i < MAXSTEPS; ++i) {
+		pos = -1.0 + 2.0 * frac(0.5 * pos + 0.5);
+		k = Q2 * t / dot(pos, pos);
+		pos *= k;
+		scale *= k;
+
+		ot.xyz = pos;
+		if (OTstyle > 0) ot -= trap;
+		float4 hk = float4(ot.xyz, k);
+		result.orbitTrap = min(result.orbitTrap, dot(hk, hk));
+	}
+
+	result.dist = 1.5 * (0.25 * abs(pos.y) / scale);
+	return result;
+}
+
+#endif  // DEVLOPEMENT_SINGLE_FRACTAL
 
 DEResult DE(float3 pos) {
 	DEResult result;
@@ -1497,10 +1687,15 @@ DEResult shortest_dist(float3 eye, float3 dir) {
 	float hop = 0;
 	float dist = MIN_DIST;
 	int i = 0;
+	float secondSurface = SECONDSURFACE;
 
 	for (; i < MAX_MARCHING_STEPS; ++i) {
 		result = DE(eye + dist * dir);
-		if (result.dist < MIN_DIST) break;
+		if (result.dist < MIN_DIST) {
+			if (secondSurface == 0.0) break;    // secondSurface is disabled (equals 0), or has already been used
+			dist += secondSurface;				// move along ray, and start looking for 2nd surface
+			secondSurface = 0;                  // set to zero as 'already been used' marker
+		}
 
 		dist += result.dist;
 		if (dist >= MAX_DIST) break;
@@ -1718,3 +1913,12 @@ void CSMain(uint3 p:SV_DispatchThreadID)
 
 	OutputMap[p.xy] = float4(color, 1);
 }
+
+/*
+	if (Reflection==0. || hitNormal == vec3(0.0)) {
+		return first;
+	} else {
+		vec3 d = reflect(dir, hitNormal);
+		return mix(first,trace(hit+d*minDist,d,hit, hitNormal),Reflection);
+	}
+*/
