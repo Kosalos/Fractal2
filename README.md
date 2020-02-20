@@ -1,4 +1,4 @@
 # Fractal2
 
 I screwed up this repository.
-please visit fractal2nEw instead
+please visit Fractal2new instead
