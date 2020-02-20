@@ -2,9 +2,6 @@
 #include "View.h"
 #include "Fractal.h"
 #include "Widget.h"
-#include "Help.h"
-#include "SaveLoad.h"
-#include "WICTextureLoader.h"
 
 HWND g_hWnd = NULL;
 ID3D11Device* pd3dDevice = nullptr;
@@ -12,17 +9,17 @@ ID3D11DeviceContext* pImmediateContext = nullptr;
 static IDXGISwapChain* pSwapChain = nullptr;
 static ID3D11RenderTargetView* pRenderTargetView = nullptr;
 ID3D11Texture2D* pBackBuffer = NULL;
+static char* CLASS_NAME = "MainWin";
+static char* WINDOW_NAME = "BareBones";
 
 #ifdef SAFE_RELEASE
 #undef SAFE_RELEASE
 #endif
-
 #ifndef SAFE_RELEASE
 #define SAFE_RELEASE(p) { if (p) { (p)->Release(); (p) = nullptr; } }
 #endif
 
 void windowSizePositionChanged();
-void WriteToBmp(const char* inFilePath);
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -35,40 +32,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		SetTimer(hWnd, 1, 100, NULL);
 		break;
-
 	case WM_TIMER:
 		fractal.timer();
 		break;
-
 	case WM_KEYDOWN:
 		fractal.keyDown(wParam);
 		break;
 	case WM_KEYUP:
 		fractal.keyUp(wParam);
 		break;
-
 	case WM_LBUTTONDOWN:
 		fractal.lButtonDown(lParam);
 		break;
 	case WM_LBUTTONUP:
 		fractal.lButtonUp();
 		break;
-	case WM_RBUTTONDOWN:
-		fractal.rButtonDown(lParam);
-		break;
-	case WM_RBUTTONUP:
-		fractal.rButtonUp();
-		break;
 	case WM_MOUSEMOVE:
 		fractal.mouseMove(wParam, lParam);
 		break;
-	case WM_MOUSEWHEEL:
-	{
-		int direction = GET_WHEEL_DELTA_WPARAM(wParam);
-		pWidget.moveFocus(-direction / 120);
-		cWidget.moveFocus(-direction / 120);
-	}
-	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -77,9 +58,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return 0;
 }
-
-static char* CLASS_NAME = "MainWin";
-static char* WINDOW_NAME = "Fractal";
 
 HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 	WNDCLASSEX wcex;
@@ -100,7 +78,7 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 		return E_FAIL;
 	}
 
-	windowHeight = (int)::GetSystemMetrics(SM_CYSCREEN) - 100;
+	windowHeight = (int)::GetSystemMetrics(SM_CYSCREEN) / 2;
 	windowWidth = windowHeight; //  (int)::GetSystemMetrics(SM_CXSCREEN);
 	RECT rc = { 0, 0, windowWidth,windowHeight };
 
@@ -116,15 +94,12 @@ HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow) {
 		MessageBox(NULL, "Window Creation Failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
 		return E_FAIL;
 	}
+	
 	ShowWindow(g_hWnd, nCmdShow);
 
-	cWidget.create(CWIDGETS, "cWidget", "Colors", g_hWnd, hInstance, 530);
-	pWidget.create(PWIDGETS, "pWidget", "Parameters", g_hWnd, hInstance, 380);
+	cWidget.create("cWidget", "Help", g_hWnd, hInstance);
+	SetFocus(g_hWnd);
 
-	fractal.cycleFocus(true);
-	
-	help.create(g_hWnd, hInstance);
-	saveLoad.create(g_hWnd, hInstance);
 	return S_OK;
 }
 
@@ -203,11 +178,6 @@ void windowSizePositionChanged() {
 		windowHeight = ys;
 		XSIZE = xs;
 		YSIZE = ys;
-
-		if (TONOFF != 0) { // for some reason, srcTextureView does not survive window resizing
-			TONOFF = 0;
-			fractal.refresh(false);
-		}
 
 		LRESULT ret = InitializeD3D11(g_hWnd);
 		ABORT(ret);

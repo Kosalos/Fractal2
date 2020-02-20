@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC94E}") = "Fractal", "Fractal2.vcxproj", "{D179A8A6-0609-4E03-AA00-A21C49DD3FEE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC94A}") = "BareBones", "BareBones.vcxproj", "{D179A8A6-0609-4E03-AA00-A21C49DD3FEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D179A8A6-0609-4E03-AA00-A21C49DD3FEE}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D179A8A6-0609-4E03-AA00-A21C49DD3FEE}.Debug|Win32.Build.0 = Debug|Win32
-		{D179A8A6-0609-4E03-AA00-A21C49DD3FEE}.Release|Win32.ActiveCfg = Release|Win32
-		{D179A8A6-0609-4E03-AA00-A21C49DD3FEE}.Release|Win32.Build.0 = Release|Win32
+		{D179A8A6-0609-4E03-AA00-A21C49DD3FEA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D179A8A6-0609-4E03-AA00-A21C49DD3FEA}.Debug|Win32.Build.0 = Debug|Win32
+		{D179A8A6-0609-4E03-AA00-A21C49DD3FEA}.Release|Win32.ActiveCfg = Release|Win32
+		{D179A8A6-0609-4E03-AA00-A21C49DD3FEA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {59D98CFC-96EE-45C4-A64A-FF97F6DAB25E}
+		SolutionGuid = {59D98CFC-96EE-45C4-A64A-FF97F6DAB25A}
 	EndGlobalSection
 EndGlobal

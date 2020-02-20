@@ -14,7 +14,7 @@
     <ProjectGuid>{D179A8A6-0609-4E03-AA00-A21C49DD3FEE}</ProjectGuid>
     <RootNamespace>ComputeFilter</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Fractal2</ProjectName>
+    <ProjectName>BareBones</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -88,12 +88,6 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\ColorMap.cpp" />
-    <ClCompile Include="source\Help.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="source\SaveBitmap.cpp" />
-    <ClCompile Include="source\SaveLoad.cpp" />
     <ClCompile Include="source\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
@@ -106,24 +100,19 @@
     <ClCompile Include="source\main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\WICTextureLoader.cpp" />
     <ClCompile Include="source\Widget.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="source\ColorMap.h" />
     <ClInclude Include="Source\common.h" />
     <ClInclude Include="source\cShader.h" />
-    <ClInclude Include="source\Help.h" />
     <ClInclude Include="source\pShader.h" />
-    <ClInclude Include="source\SaveLoad.h" />
     <ClInclude Include="source\stdafx.h" />
     <ClInclude Include="source\View.h" />
     <ClInclude Include="source\Fractal.h" />
     <ClInclude Include="source\vShader.h" />
-    <ClInclude Include="source\WICTextureLoader.h" />
     <ClInclude Include="source\Widget.h" />
   </ItemGroup>
   <ItemGroup>
